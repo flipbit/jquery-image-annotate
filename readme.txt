@@ -1,4 +1,4 @@
-jQuery Image Annotation Plugin - Version 1.0
+jQuery Image Annotation Plugin - Version 1.1
 =============================================
 
 USAGE:
@@ -7,6 +7,13 @@ navigate to demo.html.
 
 
 HISTORY:
+
+Version 1.2 24th April, 2009
+
+Fixed jQuery UI 1.3.2 compatibility.
+Forked source for jQuery 1.2.x and 1.3.x
+Notes now fade in/out - be sure to add correct jQuery UI components.
+Tidied up CSS/positioning.
 
 Version 1.1: 2nd April, 2009
 
