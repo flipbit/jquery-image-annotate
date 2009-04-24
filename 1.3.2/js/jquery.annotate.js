@@ -1,4 +1,4 @@
-﻿/// <reference path="jquery-1.2.6-vsdoc.js" />
+/// <reference path="jquery-1.2.6-vsdoc.js" />
 (function($) {
 
     $.fn.annotateImage = function(options) {
@@ -239,28 +239,13 @@
 
         $('body').append(this.form);
         this.form.css('left', this.area.offset().left + 'px');
-        this.form.css('top', (parseInt(this.area.offset().top) + parseInt(this.area.height()) + 2) + 'px');
+        this.form.css('top', (parseInt(this.area.offset().top) + parseInt(this.area.height()) + 7) + 'px');
 
         // Set the area as a draggable/resizable element contained in the image canvas.
         // Would be better to use the containment option for resizable but buggy
         area.resizable({
             handles: 'all',
-            resize: function(e, ui) {
-                if (parseInt(area.position().top) + parseInt(area.height()) + 2 > parseInt(image.canvas.height())) {
-                    area.height(parseInt(image.canvas.height()) - parseInt(area.position().top) - 2);
-                }
-                if (parseInt(area.position().left) + parseInt(area.width()) + 2 > parseInt(image.canvas.width())) {
-                    area.width(parseInt(image.canvas.width()) - parseInt(area.position().left) - 2);
-                }
-                if (parseInt(area.position().top) < 0) {
-                    area.height(parseInt(image.canvas.height())).css('top', 0);
-                }
-                if (parseInt(area.position().left) < 0) {
-                    area.width(parseInt(image.canvas.width())).css('left', 0);
-                }
-                form.css('left', area.offset().left + 'px');
-                form.css('top', (parseInt(area.offset().top) + parseInt(area.height()) + 2) + 'px');
-            },
+
             stop: function(e, ui) {
                 form.css('left', area.offset().left + 'px');
                 form.css('top', (parseInt(area.offset().top) + parseInt(area.height()) + 2) + 'px');
@@ -349,7 +334,7 @@
     $.fn.annotateView.prototype.show = function() {
         ///	<summary>
         ///		Highlights the annotation
-        ///	</summary>        
+        ///	</summary>
         this.form.fadeIn(250);
         if (!this.editable) {
             this.area.addClass('image-annotate-area-hover');
@@ -397,12 +382,12 @@
 
                 if (annotation.image.useAjax) {
                     $.ajax({
-                    url: annotation.image.deleteUrl,
+                        url: annotation.image.deleteUrl,
                         data: form.serialize(),
                         error: function(e) { alert("An error occured deleting that note.") }
                     });
                 }
-                
+
                 annotation.image.mode = 'view';
                 editable.destroy();
                 annotation.destroy();
@@ -430,6 +415,7 @@
         ///		Sets the position of an annotation.
         ///	</summary>
         this.form.html(text);
+        this.form.hide();
 
         // Resize
         this.area.children('div').height(editable.area.height() + 'px');
