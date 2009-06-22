@@ -1,4 +1,4 @@
-﻿/// <reference path="jquery-1.2.6-vsdoc.js" />
+/// <reference path="jquery-1.2.6-vsdoc.js" />
 (function($) {
 
     $.fn.annotateImage = function(options) {
@@ -154,7 +154,13 @@
                 $.ajax({
                     url: image.saveUrl,
                     data: form.serialize(),
-                    error: function(e) { alert("An error occured saving that note.") }
+                    error: function(e) { alert("An error occured saving that note.") },
+		    success: function(data) {
+		    	if (data.annotation_id != undefined) {
+		    		editable.note.id = data.annotation_id;
+		    	}
+		    },
+		    dataType: "json"
                 });
             }
 
