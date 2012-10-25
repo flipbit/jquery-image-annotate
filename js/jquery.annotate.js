@@ -113,11 +113,11 @@
         }
     };
 
-    $.fn.annotateImage.loadMore = function(newNote) {
+    $.fn.annotateImage.loadMore = function(image, newNote) {
         ///	<summary>
         ///		Loads annotation from note parameter
         ///	</summary>
-        this.image.notes[newNote] = new $.fn.annotateView(this.image, newNote);
+        image.notes[newNote] = new $.fn.annotateView(image, newNote);
     };
 
     $.fn.annotateImage.getTicks = function() {
