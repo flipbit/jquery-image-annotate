@@ -113,6 +113,13 @@
         }
     };
 
+    $.fn.annotateImage.loadMore = function(newNote) {
+        ///	<summary>
+        ///		Loads annotation from note parameter
+        ///	</summary>
+        this.image.notes[newNote] = new $.fn.annotateView(this.image, newNote);
+    };
+
     $.fn.annotateImage.getTicks = function() {
         ///	<summary>
         ///		Gets a count og the ticks for the current date.
