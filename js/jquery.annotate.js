@@ -19,6 +19,8 @@
         this.editable = opts.editable;
         this.useAjax = opts.useAjax;
         this.notes = opts.notes;
+        this.autocomplete = opts.autocomplete;
+        this.autocompleteAvailableTags = opts.autocompleteAvailableTags;
 
         // Add the canvas
         this.canvas = $('<div class="image-annotate-canvas"><div class="image-annotate-view"></div><div class="image-annotate-edit"><div class="image-annotate-edit-area"></div></div></div>');
@@ -85,7 +87,7 @@
     $.fn.annotateImage.clear = function(image) {
         ///	<summary>
         ///		Clears all existing annotations from the image.
-        ///	</summary>    
+        ///	</summary>
         for (var i = 0; i < image.notes.length; i++) {
             image.notes[image.notes[i]].destroy();
         }
@@ -117,7 +119,7 @@
         ///	<summary>
         ///		Gets a count og the ticks for the current date.
         ///     This is used to ensure that URLs are always unique and not cached by the browser.
-        ///	</summary>        
+        ///	</summary>
         var now = new Date();
         return now.getTime();
     };
@@ -125,7 +127,7 @@
     $.fn.annotateImage.add = function(image) {
         ///	<summary>
         ///		Adds a note to the image.
-        ///	</summary>        
+        ///	</summary>
         if (image.mode == 'view') {
             image.mode = 'edit';
 
@@ -244,6 +246,11 @@
         this.form = form;
 
         $('body').append(this.form);
+
+        if (image.autocomplete && image.autocompleteAvailableTags.length) {
+            $.fn.annotateImage.autocomplete(image.autocompleteAvailableTags);
+        }
+
         this.form.css('left', this.area.offset().left + 'px');
         this.form.css('top', (parseInt(this.area.offset().top) + parseInt(this.area.height()) + 7) + 'px');
 
@@ -274,7 +281,7 @@
     $.fn.annotateEdit.prototype.destroy = function() {
         ///	<summary>
         ///		Destroys an editable annotation area.
-        ///	</summary>        
+        ///	</summary>
         this.image.canvas.children('.image-annotate-edit').hide();
         this.area.resizable('destroy');
         this.area.draggable('destroy');
@@ -325,6 +332,15 @@
         }
     };
 
+
+    // Exec Autocomplete
+    $.fn.annotateImage.autocomplete = function (arrTags) {
+        $("#image-annotate-text").autocomplete({
+            source: arrTags
+        });
+    };
+
+
     $.fn.annotateView.prototype.setPosition = function() {
         ///	<summary>
         ///		Sets the position of an annotation.
@@ -352,7 +368,7 @@
     $.fn.annotateView.prototype.hide = function() {
         ///	<summary>
         ///		Removes the highlight from the annotation.
-        ///	</summary>      
+        ///	</summary>
         this.form.fadeOut(250);
         this.area.removeClass('image-annotate-area-hover');
         this.area.removeClass('image-annotate-area-editable-hover');
@@ -361,7 +377,7 @@
     $.fn.annotateView.prototype.destroy = function() {
         ///	<summary>
         ///		Destroys the annotation.
-        ///	</summary>      
+        ///	</summary>
         this.area.remove();
         this.form.remove();
     }
@@ -369,7 +385,7 @@
     $.fn.annotateView.prototype.edit = function() {
         ///	<summary>
         ///		Edits the annotation.
-        ///	</summary>      
+        ///	</summary>
         if (this.image.mode == 'view') {
             this.image.mode = 'edit';
             var annotation = this;
