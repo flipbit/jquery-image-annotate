@@ -10,14 +10,14 @@ Extract [this zip file] [7] into a directory on your web server and navigate to 
 
 To use the plugin you first need to reference the jQuery and jQuery UI libraries in your page. Add 
 the `jquery.annotate.js` and `annotation.css` files to enable the plugin.
-
+```html
 	<style type="text/css" media="all">@import "css/annotation.css";</style>
 	<script type="text/javascript" src="js/jquery-1.3.2.js"></script>
 	<script type="text/javascript" src="js/jquery-ui-1.7.1.js"></script>
 	<script type="text/javascript" src="js/jquery.annotate.js"></script>
-
+```
 Once you've added in the necessary scripts, hook up an image on the page by using the following syntax:
-
+```html
 	<script language="javascript">
 	  $(window).load(function() {
 	    $("#toAnnotate").annotateImage({
@@ -40,13 +40,13 @@ Once you've added in the necessary scripts, hook up an image on the page by usin
 	    });
 	  });
 	</script>
-
+```
 It is important to use the `$(function() { ... });`  function as this will fire once the page and 
 all it's images have loaded. Failing to do so will result in the plugin executing before the image 
 dimensions have been determined.
 
 The HTML markup for the page looks like this:
-
+```html
 	<html>
 	  	<head>
 	    	<title>Demo Page</title>
@@ -57,7 +57,7 @@ The HTML markup for the page looks like this:
 	    	</div>
 	  	</body>
 	</html>
-
+```
 A copy of all this code is included in the release.
 
 ###History:
