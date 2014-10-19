@@ -24,7 +24,12 @@ module.exports = function(grunt) {
     uglify: {
       dist: {
         files: {
-          'dist/jquery.annotate.min.js': ['js/jquery.annotate.js']
+          'dist/jquery.annotate.min.js': ['js/jquery.annotate.js'],
+          'dist/jquery.annotate.concat.min.js': [
+          	'dist/jquery.min.js',
+          	'dist/query-ui.min.js',
+          	'js/jquery.annotate.js'
+          ]
         }
       }
     }
