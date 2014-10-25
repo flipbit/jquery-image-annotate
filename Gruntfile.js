@@ -60,7 +60,9 @@ module.exports = function(grunt) {
           'dist/css/annotate.min.css': ['css/annotation.css']
         }
       }
-    }
+    },
+
+    clean: ['dist']
 
   });
 
