@@ -1,4 +1,4 @@
-#jQuery Image Annotation Plugin
+# jQuery Image Annotation Plugin
 
 A jQuery Image Annotation plugin that can create Flickr-like comments on images embedded in web pages.
 
@@ -6,7 +6,7 @@ This plugin works with jQuery ~1.8.1.
 
 Extract [this zip file] [7] into a directory on your web server and navigate to `demo-static.html` or view a [live preview][1].
 
-###Usage:
+### Usage:
 
 To use the plugin you first need to reference the jQuery and jQuery UI libraries in your page. Add 
 the `jquery.annotate.js` and `annotation.css` files to enable the plugin.
@@ -60,7 +60,7 @@ The HTML markup for the page looks like this:
 
 A copy of all this code is included in the release.
 
-###Build:
+### Build:
 
 A minimized distribution of the plugin and required resources is available in ```dist/```. 
 To rebuild yourself do:
