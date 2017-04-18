@@ -18,8 +18,14 @@
         this.deleteUrl = opts.deleteUrl;
         this.editable = opts.editable;
         this.useAjax = opts.useAjax;
-        this.notes = opts.notes;
-
+        
+		this.notes = [];
+		
+		for(var i=0;i<opts.notes.length;i++)
+		{
+			this.notes.push($.extend({}, $.fn.annotateImage.noteDefaults, opts.notes[i]))
+		}
+		
         // Add the canvas
         this.canvas = $('<div class="image-annotate-canvas"><div class="image-annotate-view"></div><div class="image-annotate-edit"><div class="image-annotate-edit-area"></div></div></div>');
         this.canvas.children('.image-annotate-edit').hide();
@@ -81,6 +87,19 @@
         useAjax: true,
         notes: new Array()
     };
+	
+    $.fn.annotateImage.noteDefaults = {
+		id : "new", 
+		top : 30,
+		left : 30,
+		width : 30,
+		height : 30,
+		text : "",
+		url : null,
+		target : '_self',
+		image : null,
+		hoverImage : null
+    };
 
     $.fn.annotateImage.clear = function(image) {
         ///	<summary>
@@ -111,6 +130,13 @@
         for (var i = 0; i < image.notes.length; i++) {
             image.notes[image.notes[i]] = new $.fn.annotateView(image, image.notes[i]);
         }
+    };
+
+    $.fn.annotateImage.loadMore = function(image, newNote) {
+        ///	<summary>
+        ///		Loads annotation from note parameter
+        ///	</summary>
+        image.notes[newNote] = new $.fn.annotateView(image, newNote);
     };
 
     $.fn.annotateImage.getTicks = function() {
@@ -217,14 +243,7 @@
         if (note) {
             this.note = note;
         } else {
-            var newNote = new Object();
-            newNote.id = "new";
-            newNote.top = 30;
-            newNote.left = 30;
-            newNote.width = 30;
-            newNote.height = 30;
-            newNote.text = "";
-            this.note = newNote;
+            this.note = $.fn.annotateImage.noteDefaults;
         }
 
         // Set area
@@ -294,13 +313,27 @@
         this.note = note;
 
         this.editable = (note.editable && image.editable);
-
+		
+		var img = null;
+		
+		
         // Add the area
-        this.area = $('<div class="image-annotate-area' + (this.editable ? ' image-annotate-area-editable' : '') + '"><div></div></div>');
-        image.canvas.children('.image-annotate-view').prepend(this.area);
+        this.area = $('<div class="image-annotate-area ' + (note.image == null ? 'image-annotate-area-border' : '' ) + (this.editable ? ' image-annotate-area-editable' : '') + '"><div></div></div>');
+        
+		//(note.image != null ? '<img style="height:' + note.height +'px; width:' + note.width + 'px;" src="' + note.image + '"/>' : '')
+		
+
+		image.canvas.children('.image-annotate-view').prepend(this.area);
 
         // Add the note
         this.form = $('<div class="image-annotate-note">' + note.text + '</div>');
+		
+		if(note.url != null)
+		{
+			$(this.area).click(function(){ window.open(note.url, note.target);});
+			$(this.area).css('cursor','pointer');
+		}
+		
         this.form.hide();
         image.canvas.children('.image-annotate-view').append(this.form);
         this.form.children('span.actions').hide();
@@ -329,8 +362,33 @@
         ///	<summary>
         ///		Sets the position of an annotation.
         ///	</summary>
-        this.area.children('div').height((parseInt(this.note.height) - 2) + 'px');
-        this.area.children('div').width((parseInt(this.note.width) - 2) + 'px');
+		var height = parseInt(this.note.height) - 2 + 'px';
+		var width = (parseInt(this.note.width) - 2) + 'px';
+        var img = null;
+		var hoverImg = null;
+		
+		this.area.children('div').height(height);
+        this.area.children('div').width(width);
+		
+		if(this.note.image != null)
+		{
+			img = $('<img id="dynamic">'); //Equivalent: $(document.createElement('img'))
+			img.attr('src', this.note.image);
+			$(img).css('height',height);
+			$(img).css('width',width);
+			img.appendTo(this.area.children('div'));
+		}
+		
+		if(this.note.hoverImage != null)
+		{
+			hoverImg = $('<img id="hoverImage" class="image-annotate-hoverimg">'); //Equivalent: $(document.createElement('img'))
+			hoverImg.attr('src', this.note.hoverImage);
+			$(hoverImg).css('height',height);
+			$(hoverImg).css('width',width);
+			$(this.area).hover(function(){$(hoverImage).show(); $(img).hide()},function(){$(hoverImage).hide(); $(img).show()})
+			hoverImg.appendTo(this.area.children('div'));
+		}
+		
         this.area.css('left', (this.note.left) + 'px');
         this.area.css('top', (this.note.top) + 'px');
         this.form.css('left', (this.note.left) + 'px');

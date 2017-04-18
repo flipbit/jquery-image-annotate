@@ -29,11 +29,20 @@
     display: none;
     position: relative;
 }
+
+.image-annotate-hoverimg {
+	display:none;
+}
+
 .image-annotate-area {
-    border: 1px solid #000000;
     position: absolute;
 }
-.image-annotate-area div {
+
+.image-annotate-area-border {
+    border: 1px solid #000000;
+}
+
+.image-annotate-area-border div {
     border: 1px solid #FFFFFF;
     display: block;
 }
