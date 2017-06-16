@@ -1,4 +1,53 @@
 /// <reference path="jquery-1.2.6-vsdoc.js" />
+
+// Need this to support IE<=11
+// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex#Polyfill
+// https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+if (!Array.prototype.findIndex) {
+  Object.defineProperty(Array.prototype, 'findIndex', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
+      }
+
+      var o = Object(this);
+
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
+
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
+
+      // 5. Let k be 0.
+      var k = 0;
+
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+        // d. If testResult is true, return k.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return k;
+        }
+        // e. Increase k by 1.
+        k++;
+      }
+
+      // 7. Return -1.
+      return -1;
+    }
+  });
+}
+
+
 (function($) {
 
     $.fn.annotateImage = function(options) {
@@ -85,7 +134,7 @@
     $.fn.annotateImage.clear = function(image) {
         ///	<summary>
         ///		Clears all existing annotations from the image.
-        ///	</summary>    
+        ///	</summary>
         for (var i = 0; i < image.notes.length; i++) {
             image.notes[image.notes[i]].destroy();
         }
@@ -117,7 +166,7 @@
         ///	<summary>
         ///		Gets a count og the ticks for the current date.
         ///     This is used to ensure that URLs are always unique and not cached by the browser.
-        ///	</summary>        
+        ///	</summary>
         var now = new Date();
         return now.getTime();
     };
@@ -125,7 +174,7 @@
     $.fn.annotateImage.add = function(image) {
         ///	<summary>
         ///		Adds a note to the image.
-        ///	</summary>        
+        ///	</summary>
         if (image.mode == 'view') {
             image.mode = 'edit';
 
@@ -274,7 +323,7 @@
     $.fn.annotateEdit.prototype.destroy = function() {
         ///	<summary>
         ///		Destroys an editable annotation area.
-        ///	</summary>        
+        ///	</summary>
         this.image.canvas.children('.image-annotate-edit').hide();
         this.area.resizable('destroy');
         this.area.draggable('destroy');
@@ -352,7 +401,7 @@
     $.fn.annotateView.prototype.hide = function() {
         ///	<summary>
         ///		Removes the highlight from the annotation.
-        ///	</summary>      
+        ///	</summary>
         this.form.fadeOut(250);
         this.area.removeClass('image-annotate-area-hover');
         this.area.removeClass('image-annotate-area-editable-hover');
@@ -361,15 +410,23 @@
     $.fn.annotateView.prototype.destroy = function() {
         ///	<summary>
         ///		Destroys the annotation.
-        ///	</summary>      
+        ///	</summary>
         this.area.remove();
         this.form.remove();
+
+        var noteToDelete = this.note;
+
+        var noteIndex = this.image.notes.findIndex(function(note) {
+          return note === noteToDelete;
+        });
+
+        this.image.notes.splice(noteIndex, 1);
     }
 
     $.fn.annotateView.prototype.edit = function() {
         ///	<summary>
         ///		Edits the annotation.
-        ///	</summary>      
+        ///	</summary>
         if (this.image.mode == 'view') {
             this.image.mode = 'edit';
             var annotation = this;
