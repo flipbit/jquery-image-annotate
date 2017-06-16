@@ -414,8 +414,10 @@ if (!Array.prototype.findIndex) {
         this.area.remove();
         this.form.remove();
 
+        var noteToDelete = this.note;
+
         var noteIndex = this.image.notes.findIndex(function(note) {
-          return note === this.note;
+          return note === noteToDelete;
         });
 
         this.image.notes.splice(noteIndex, 1);
