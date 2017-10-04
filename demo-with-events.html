@@ -1,0 +1,28 @@
+<html>
+	<head>
+		<title>Image Annotations</title>
+		<style type="text/css" media="all">@import "css/annotation.css";</style>
+		<script type="text/javascript" src="dist/js/jquery.min.js"></script>
+		<script type="text/javascript" src="dist/js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.annotate.js"></script>
+
+		<script language="javascript">
+			$(window).load(function() {
+				$("#toAnnotate").annotateImage({
+					editable: true,
+          useAjax: false,
+          onCreate: function(){ console.log('Event: On Create') },
+          onUpdate: function(){ console.log('Event: On Update') },
+          onDelete: function(){ console.log('Event: On Delete') },
+          onChange: function(){ console.log(this.notes) },
+					notes: []
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div>
+			<img id="toAnnotate" src="images/trafalgar-square-annotated.jpg" alt="Trafalgar Square" width="600" height="398" />
+		</div>
+	</body>
+</html>

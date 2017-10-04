@@ -19,6 +19,10 @@
         this.editable = opts.editable;
         this.useAjax = opts.useAjax;
         this.notes = opts.notes;
+        this.onCreate = opts.onCreate != null ? opts.onCreate : function() {}
+        this.onUpdate = opts.onUpdate != null ? opts.onUpdate : function() {}
+        this.onDelete = opts.onDelete != null ? opts.onDelete : function() {}
+        this.onChange = opts.onChange != null ? opts.onChange : function() {}
 
         // Add the canvas
         this.canvas = $('<div class="image-annotate-canvas"><div class="image-annotate-view"></div><div class="image-annotate-edit"><div class="image-annotate-edit-area"></div></div></div>');
@@ -167,11 +171,15 @@
             // Add to canvas
             if (note) {
                 note.resetPosition(editable, text);
+                image.onUpdate()
+                image.onChange()
             } else {
                 editable.note.editable = true;
                 note = new $.fn.annotateView(image, editable.note)
                 note.resetPosition(editable, text);
                 image.notes.push(editable.note);
+                image.onCreate()
+                image.onChange()
             }
 
             editable.destroy();
@@ -214,11 +222,19 @@
         ///	</summary>
         this.image = image;
 
+        // generate randomic guid
+        function guidGenerator() {
+            var S4 = function() {
+               return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+            };
+            return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+        }
+
         if (note) {
             this.note = note;
         } else {
             var newNote = new Object();
-            newNote.id = "new";
+            newNote.id = guidGenerator();
             newNote.top = 30;
             newNote.left = 30;
             newNote.width = 30;
@@ -366,7 +382,10 @@
         this.form.remove();
     }
 
-    $.fn.annotateView.prototype.edit = function() {
+    $.fn.annotateView.prototype.edit = function(img) {
+
+        var selfNote = this.note
+
         ///	<summary>
         ///		Edits the annotation.
         ///	</summary>      
@@ -382,6 +401,15 @@
             // Add the delete button
             var del = $('<a class="image-annotate-edit-delete">Delete</a>');
             del.click(function() {
+
+                let aux = []
+                img.notes.forEach(function(value,index){
+                    if ( value.id != selfNote.id ) {
+                        aux.push(img.notes[index])
+                    }
+                })
+                img.notes = aux
+
                 var form = $('#image-annotate-edit-form form');
 
                 $.fn.annotateImage.appendPosition(form, editable)
@@ -393,6 +421,9 @@
                         error: function(e) { alert("An error occured deleting that note.") }
                     });
                 }
+
+                annotation.image.onDelete()
+                annotation.image.onChange()
 
                 annotation.image.mode = 'view';
                 editable.destroy();
