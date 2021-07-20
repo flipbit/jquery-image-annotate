@@ -1,19 +1,19 @@
-#jQuery Image Annotation Plugin
+# jQuery Image Annotation Plugin
 
 A jQuery Image Annotation plugin that can create Flickr-like comments on images embedded in web pages.
 
-This plugin works with jQuery 1.7.1.
+This plugin works with jQuery ~1.8.1.
 
-Extract [this zip file] [7] into a directory on your web server and navigate to `demo-static.html` or view a [live preview][1].
+Extract [this zip file][7] into a directory on your web server and navigate to `demo-static.html` or view a [live preview][1].
 
-###Usage:
+### Usage:
 
 To use the plugin you first need to reference the jQuery and jQuery UI libraries in your page. Add 
 the `jquery.annotate.js` and `annotation.css` files to enable the plugin.
 ```html
 	<style type="text/css" media="all">@import "css/annotation.css";</style>
-	<script type="text/javascript" src="js/jquery-1.3.2.js"></script>
-	<script type="text/javascript" src="js/jquery-ui-1.7.1.js"></script>
+	<script type="text/javascript" src="dist/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dist/js/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="js/jquery.annotate.js"></script>
 ```
 Once you've added in the necessary scripts, hook up an image on the page by using the following syntax:
@@ -60,55 +60,72 @@ The HTML markup for the page looks like this:
 ```
 A copy of all this code is included in the release.
 
-###History:
+### Build:
 
-####Version 1.4 19th January, 2011
+A minimized distribution of the plugin and required resources is available in ```dist/```. 
+To rebuild yourself do:
+
+```sh
+# Download jQuery dependencies
+bower install
+# Delete dist directory
+grunt clean
+# Build
+grunt
+```
+
+```dist/js/jquery.annotate.concat.min.js``` includes all of the required javascript 
+minimized and concated into one file.
+
+### History:
+
+#### Version 1.4 19th January, 2011
 * Upgraded jQuery to version 1.7.1
 
 
-####Version 1.3 22nd June, 2009
+#### Version 1.3 22nd June, 2009
 * Fixed a bug when creating a new annotation via AJAX.
 * The Id of the annotation is expected to be returned as a JSON object from the response of the save call, e.g.
 
     `{ "annotation_id": "000001" }`
 
 
-####Version 1.2 24th April, 2009
+#### Version 1.2 24th April, 2009
 * Fixed jQuery UI 1.3.2 compatibility.
 * Forked source for jQuery 1.2.x and 1.3.x
 * Notes now fade in/out - be sure to add correct jQuery UI components.
 * Tidied up CSS/positioning.
 
 
-####Version 1.1: 2nd April, 2009
+#### Version 1.1: 2nd April, 2009
 * Fixed bug when annotating an image with no previous annotations.
 
 
-####Version 1.0: 11th March, 2009
+#### Version 1.0: 11th March, 2009
 * Initial release
 
 
-###Credits:
+### Credits:
 
 Based on the Drupal extension:
 
 Image Annotations by Ronan Berder  
 hunvreus@gmail.com  
-[http://drupal.org/project/image_annotate] [2]  
-[http://drupal.org/user/49057] [3]  
-[http://teddy.fr] [4]  
+[http://drupal.org/project/image_annotate][2]  
+[http://drupal.org/user/49057][3]  
+[http://teddy.fr][4]  
 
 
 FamFamFam Icons by:  
 Mark James  
-[http://www.famfamfam.com/] [5]  
+[http://www.famfamfam.com/][5]  
                                   
 
 Trafalgar Square image by:  
 Maurice  
-[http://www.flickr.com/photos/mauricedb/2742966709/] [6]  
+[http://www.flickr.com/photos/mauricedb/2742966709/][6]  
 
-###Licence:
+### Licence:
 
 Released under the GNU license.
 
