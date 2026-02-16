@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>React — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18",
+      "react-dom": "https://esm.sh/react-dom@18",
+      "react-dom/client": "https://esm.sh/react-dom@18/client",
+      "react/jsx-runtime": "https://esm.sh/react@18/jsx-runtime"
+    }
+  }
+  </script>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html" class="active">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+  </nav>
+  <div class="demo-content">
+    <h1>React</h1>
+    <p>React 18 component with event callbacks and imperative ref methods.</p>
+    <div id="react-root"></div>
+  </div>
+
+  <script type="module">
+    import { createRoot } from 'react-dom/client';
+    import { createElement as h, useRef, useCallback, useState } from 'react';
+    import { AnnotateImage } from '../dist/react.js';
+
+    var notes = [
+      { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "note-1", editable: true },
+      { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "note-2", editable: false },
+      { top: 500, left: 150, width: 550, height: 200, text: "Village below", id: "note-3", editable: true },
+      { top: 30, left: 750, width: 120, height: 120, text: "Crescent moon", id: "note-4", editable: false }
+    ];
+
+    function timestamp() {
+      return '[' + new Date().toLocaleTimeString() + '] ';
+    }
+
+    function App() {
+      var annotateRef = useRef(null);
+      var [log, setLog] = useState([]);
+      var [notesJson, setNotesJson] = useState('');
+
+      function addLog(msg) {
+        setLog(function(prev) { return prev.concat(timestamp() + msg); });
+      }
+
+      var onSave = useCallback(function(note) {
+        addLog('onSave: "' + note.text + '" (id: ' + note.id + ')');
+      }, []);
+
+      var onDelete = useCallback(function(note) {
+        addLog('onDelete: "' + note.text + '" (id: ' + note.id + ')');
+      }, []);
+
+      var onChange = useCallback(function(allNotes) {
+        addLog('onChange: ' + allNotes.length + ' notes');
+      }, []);
+
+      var onLoad = useCallback(function(allNotes) {
+        addLog('onLoad: ' + allNotes.length + ' notes loaded');
+      }, []);
+
+      var onError = useCallback(function(context) {
+        addLog('onError (' + context.type + '): ' + context.error.message);
+      }, []);
+
+      function handleAdd() {
+        if (!annotateRef.current) { addLog('Not initialized'); return; }
+        annotateRef.current.add();
+        addLog('add() called — draw a region on the image');
+      }
+
+      function handleClear() {
+        if (!annotateRef.current) { addLog('Not initialized'); return; }
+        annotateRef.current.clear();
+        addLog('clear() called — all annotations removed');
+      }
+
+      function handleGetNotes() {
+        if (!annotateRef.current) { addLog('Not initialized'); return; }
+        var current = annotateRef.current.getNotes();
+        setNotesJson(JSON.stringify(current, null, 2));
+        addLog('getNotes() returned ' + current.length + ' notes — see below');
+      }
+
+      return h('div', { className: 'demo-section' },
+        h('h2', null, 'Controls'),
+        h('div', { className: 'demo-controls' },
+          h('button', { onClick: handleAdd }, 'Add Note'),
+          h('button', { onClick: handleClear }, 'Clear All'),
+          h('button', { onClick: handleGetNotes }, 'Get Notes')
+        ),
+        h(AnnotateImage, {
+          ref: annotateRef,
+          src: 'images/starry-night.jpg',
+          width: 960,
+          height: 760,
+          editable: true,
+          notes: notes,
+          onSave: onSave,
+          onDelete: onDelete,
+          onChange: onChange,
+          onLoad: onLoad,
+          onError: onError,
+        }),
+        h('h3', null, 'Event Log'),
+        h('div', { className: 'demo-status' }, log.join('\n') || null),
+        h('h3', null, 'Notes JSON'),
+        h('div', { className: 'demo-status' }, notesJson || null)
+      );
+    }
+
+    var root = createRoot(document.getElementById('react-root'));
+    root.render(h(App));
+  </script>
+</body>
+</html>

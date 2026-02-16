@@ -1,3 +1,5 @@
 node_modules/
-bower_components/
+dist/
+test-results/
+playwright-report/
 .DS_Store

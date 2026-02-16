@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Programmatic API — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html" class="active">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+  </nav>
+  <div class="demo-content">
+    <h1>Programmatic API</h1>
+    <p>Control the plugin via JavaScript. Click buttons to call public methods.</p>
+
+    <div class="demo-section">
+      <h2>Controls</h2>
+      <div class="demo-controls">
+        <button id="btn-add">Add Note</button>
+        <button id="btn-clear">Clear All</button>
+        <button id="btn-reload">Reload Notes</button>
+        <button id="btn-destroy">Destroy</button>
+        <button id="btn-reinit">Reinitialize</button>
+        <button id="btn-export">Export Notes</button>
+        <button id="btn-error">Trigger Error</button>
+      </div>
+
+      <img id="api-image" src="images/great-wave.jpg" alt="The Great Wave" width="800" height="538">
+
+      <h3>Status</h3>
+      <div id="api-status" class="demo-status"></div>
+
+      <h3>Notes JSON</h3>
+      <div id="export-target" class="demo-status"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { annotate } from '../dist/core.js';
+
+    var initialNotes = [
+      { top: 20, left: 200, width: 300, height: 180, text: "The great wave", id: "pa-1", editable: true },
+      { top: 150, left: 580, width: 120, height: 100, text: "Mount Fuji", id: "pa-2", editable: true },
+      { top: 200, left: 30, width: 140, height: 80, text: "Fishing boats", id: "pa-3", editable: false }
+    ];
+
+    var instance = null;
+    var img = null;
+
+    function logStatus(msg) {
+      var el = document.getElementById('api-status');
+      var time = new Date().toLocaleTimeString();
+      el.textContent += '[' + time + '] ' + msg + '\n';
+    }
+
+    function initPlugin() {
+      img = document.getElementById('api-image');
+      instance = annotate(img, {
+        editable: true,
+        notes: JSON.parse(JSON.stringify(initialNotes)),
+        onError: function(context) {
+          logStatus('ERROR (' + context.type + '): ' + context.error.message);
+        }
+      });
+      logStatus('Plugin initialized with ' + initialNotes.length + ' notes');
+    }
+
+    window.addEventListener('load', function() {
+      initPlugin();
+
+      document.getElementById('btn-add').addEventListener('click', function() {
+        if (!instance) { logStatus('Plugin not initialized'); return; }
+        instance.add();
+        logStatus('add() called — draw a region on the image');
+      });
+
+      document.getElementById('btn-clear').addEventListener('click', function() {
+        if (!instance) { logStatus('Plugin not initialized'); return; }
+        instance.clear();
+        logStatus('clear() called — all annotations removed. notes.length = ' + instance.notes.length);
+      });
+
+      document.getElementById('btn-reload').addEventListener('click', function() {
+        if (!instance) { logStatus('Plugin not initialized'); return; }
+        instance.notes = JSON.parse(JSON.stringify(initialNotes));
+        instance.load();
+        logStatus('load() called — reloaded ' + instance.notes.length + ' notes');
+      });
+
+      document.getElementById('btn-destroy').addEventListener('click', function() {
+        if (!instance) { logStatus('Plugin already destroyed'); return; }
+        instance.destroy();
+        instance = null;
+        logStatus('destroy() called — plugin removed, original image restored');
+      });
+
+      document.getElementById('btn-reinit').addEventListener('click', function() {
+        if (instance) {
+          instance.destroy();
+          logStatus('Destroyed existing instance first');
+        }
+        initPlugin();
+      });
+
+      document.getElementById('btn-export').addEventListener('click', function() {
+        if (!instance) { logStatus('Plugin not initialized'); return; }
+        var notes = instance.notes.map(function(n) {
+          return { id: n.id, top: n.top, left: n.left, width: n.width, height: n.height, text: n.text, editable: n.editable };
+        });
+        document.getElementById('export-target').textContent = JSON.stringify(notes, null, 2);
+        logStatus('Exported ' + notes.length + ' notes as JSON — see below');
+      });
+
+      document.getElementById('btn-error').addEventListener('click', function() {
+        if (!instance) { logStatus('Plugin not initialized'); return; }
+        instance.api.load = function() { return Promise.reject(new Error('Simulated load failure')); };
+        instance.api.load().catch(function(err) {
+          instance.reportError({ type: 'load', error: err });
+        });
+        logStatus('api.load() called with simulated failure — error should appear');
+      });
+    });
+  </script>
+</body>
+</html>

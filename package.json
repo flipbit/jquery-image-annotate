@@ -1,13 +1,111 @@
 {
-  "name": "jquery-image-annotate",
-  "version": "0.0.0",
+  "name": "annotate-image",
+  "version": "2.0.0",
+  "license": "GPL-2.0",
+  "files": [
+    "dist/",
+    "LICENSE"
+  ],
+  "main": "dist/core.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/core.js",
+      "default": "./dist/core.min.js"
+    },
+    "./jquery": {
+      "types": "./dist/types/jquery.annotate.d.ts",
+      "import": "./dist/jquery.js",
+      "default": "./dist/jquery.min.js"
+    },
+    "./react": {
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./vue": {
+      "types": "./dist/types/vue.d.ts",
+      "import": "./dist/vue.js"
+    },
+    "./css": "./dist/css/annotate.min.css"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build:dirs": "mkdir -p dist/css dist/types",
+    "build:check": "tsc --noEmit",
+    "build:types": "tsc --emitDeclarationOnly --noEmit false --declaration --declarationDir dist/types --outDir dist/types",
+    "build:core": "esbuild src/index.ts --bundle --format=esm --outfile=dist/core.js",
+    "build:core:iife": "esbuild src/index.ts --bundle --minify --format=iife --global-name=AnnotateImage --outfile=dist/core.min.js",
+    "build:jquery": "esbuild src/jquery.annotate.ts --bundle --format=esm --external:jquery --outfile=dist/jquery.js",
+    "build:jquery:iife": "esbuild src/jquery.annotate.ts --bundle --minify --external:jquery --outfile=dist/jquery.min.js",
+    "build:react": "esbuild src/react.tsx --bundle --format=esm --external:react --external:react-dom --outfile=dist/react.js",
+    "build:vue": "esbuild src/vue.ts --bundle --format=esm --external:vue --outfile=dist/vue.js",
+    "build:css": "esbuild src/annotation.css --minify --outfile=dist/css/annotate.min.css",
+    "build": "npm run clean && npm run build:dirs && npm run build:check && npm run build:types && npm run build:core && npm run build:core:iife && npm run build:jquery && npm run build:jquery:iife && npm run build:react && npm run build:vue && npm run build:css",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:jquery4": "npm install jquery@4 --no-save && vitest run; STATUS=$?; npm install --no-save; exit $STATUS",
+    "test:e2e": "npx playwright test --config e2e/playwright.config.ts",
+    "lint": "eslint src/ test/",
+    "lint:fix": "eslint --fix src/ test/",
+    "format": "prettier --write 'src/**/*.{ts,css}' 'test/**/*.ts' '*.{js,ts,json}'",
+    "format:check": "prettier --check 'src/**/*.{ts,css}' 'test/**/*.ts' '*.{js,ts,json}'",
+    "demo": "npm run build && concurrently -k \"npm:demo:watch:*\" \"npm:demo:serve\"",
+    "demo:watch:core": "esbuild src/index.ts --bundle --format=esm --outfile=dist/core.js --watch",
+    "demo:watch:core-min": "esbuild src/index.ts --bundle --minify --format=iife --global-name=AnnotateImage --outfile=dist/core.min.js --watch",
+    "demo:watch:jquery": "esbuild src/jquery.annotate.ts --bundle --format=esm --external:jquery --outfile=dist/jquery.js --watch",
+    "demo:watch:jquery-min": "esbuild src/jquery.annotate.ts --bundle --minify --external:jquery --outfile=dist/jquery.min.js --watch",
+    "demo:watch:react": "esbuild src/react.tsx --bundle --format=esm --external:react --external:react-dom --outfile=dist/react.js --watch",
+    "demo:watch:vue": "esbuild src/vue.ts --bundle --format=esm --external:vue --outfile=dist/vue.js --watch",
+    "demo:watch:css": "esbuild src/annotation.css --minify --outfile=dist/css/annotate.min.css --watch",
+    "demo:serve": "live-server --port=8080 --open=demo/index.html --watch=dist,demo",
+    "demo:ci": "npm run build && concurrently -k \"npm:demo:watch:*\" \"npm:demo:serve:ci\"",
+    "demo:serve:ci": "live-server --port=8080 --no-browser --watch=dist,demo"
+  },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-copy": "^0.7.0",
-    "grunt-contrib-cssmin": "^0.10.0",
-    "grunt-contrib-uglify": "^0.6.0",
-    "load-grunt-tasks": "^0.6.0"
+    "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.58.2",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/jquery": "^3.5.33",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@vue/test-utils": "^2.4.6",
+    "concurrently": "^9.2.1",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-vue": "^10.8.0",
+    "jquery": "^3.7.1",
+    "jsdom": "^28.0.0",
+    "live-server": "^1.2.2",
+    "prettier": "^3.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0",
+    "vitest": "^4.0.18",
+    "vue": "^3.5.28"
+  },
+  "peerDependencies": {
+    "jquery": ">=3.7.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "vue": ">=3.3.0"
+  },
+  "peerDependenciesMeta": {
+    "jquery": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
   }
 }

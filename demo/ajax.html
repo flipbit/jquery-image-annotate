@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AJAX — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../dist/jquery.min.js"></script>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html" class="active">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+  </nav>
+  <div class="demo-content">
+    <h1>AJAX</h1>
+    <p>Load, save, and delete annotations via fetch. Custom error handling callback.</p>
+
+    <div class="demo-section">
+      <h2>AJAX-Loaded Annotations</h2>
+      <p>Annotations are fetched from <code>fixtures/get.json</code>. Save and delete POST to fixture endpoints.</p>
+      <img id="ajax-image" src="images/mona-lisa.jpg" alt="Mona Lisa" width="960" height="1431">
+      <div id="ajax-status" class="demo-status"></div>
+    </div>
+  </div>
+
+  <script>
+    function logStatus(msg) {
+      var el = document.getElementById('ajax-status');
+      var time = new Date().toLocaleTimeString();
+      el.textContent += '[' + time + '] ' + msg + '\n';
+    }
+
+    $(window).on('load', function() {
+      logStatus('Initializing plugin with AJAX...');
+
+      $('#ajax-image').annotateImage({
+        api: {
+          load: 'fixtures/get.json',
+          save: 'fixtures/save.json',
+          delete: 'fixtures/delete.json',
+        },
+        editable: true,
+        onError: function(context) {
+          logStatus('ERROR (' + context.type + '): ' + context.error.message);
+        }
+      });
+
+      logStatus('Plugin initialized. Annotations loading from fixtures/get.json');
+    });
+  </script>
+</body>
+</html>

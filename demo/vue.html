@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vue — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://esm.sh/vue@3"
+    }
+  }
+  </script>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html" class="active">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+  </nav>
+  <div class="demo-content">
+    <h1>Vue</h1>
+    <p>Vue 3 component with event handling and template ref methods.</p>
+    <div id="vue-root"></div>
+  </div>
+
+  <script type="module">
+    import { createApp, ref, h } from 'vue';
+    import { AnnotateImage } from '../dist/vue.js';
+
+    var notes = [
+      { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "note-1", editable: true },
+      { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "note-2", editable: false },
+      { top: 500, left: 150, width: 550, height: 200, text: "Village below", id: "note-3", editable: true },
+      { top: 30, left: 750, width: 120, height: 120, text: "Crescent moon", id: "note-4", editable: false }
+    ];
+
+    function timestamp() {
+      return '[' + new Date().toLocaleTimeString() + '] ';
+    }
+
+    var app = createApp({
+      setup: function() {
+        var annotateRef = ref(null);
+        var log = ref([]);
+        var notesJson = ref('');
+
+        function addLog(msg) {
+          log.value = log.value.concat(timestamp() + msg);
+        }
+
+        function onSave(note) {
+          addLog('save: "' + note.text + '" (id: ' + note.id + ')');
+        }
+
+        function onDelete(note) {
+          addLog('delete: "' + note.text + '" (id: ' + note.id + ')');
+        }
+
+        function onChange(allNotes) {
+          addLog('change: ' + allNotes.length + ' notes');
+        }
+
+        function onLoad(allNotes) {
+          addLog('load: ' + allNotes.length + ' notes loaded');
+        }
+
+        function onError(context) {
+          addLog('error (' + context.type + '): ' + context.error.message);
+        }
+
+        function handleAdd() {
+          if (!annotateRef.value) { addLog('Not initialized'); return; }
+          annotateRef.value.add();
+          addLog('add() called — draw a region on the image');
+        }
+
+        function handleClear() {
+          if (!annotateRef.value) { addLog('Not initialized'); return; }
+          annotateRef.value.clear();
+          addLog('clear() called — all annotations removed');
+        }
+
+        function handleGetNotes() {
+          if (!annotateRef.value) { addLog('Not initialized'); return; }
+          var current = annotateRef.value.getNotes();
+          notesJson.value = JSON.stringify(current, null, 2);
+          addLog('getNotes() returned ' + current.length + ' notes — see below');
+        }
+
+        return function() {
+          return h('div', { class: 'demo-section' }, [
+            h('h2', null, 'Controls'),
+            h('div', { class: 'demo-controls' }, [
+              h('button', { onClick: handleAdd }, 'Add Note'),
+              h('button', { onClick: handleClear }, 'Clear All'),
+              h('button', { onClick: handleGetNotes }, 'Get Notes')
+            ]),
+            h(AnnotateImage, {
+              ref: annotateRef,
+              src: 'images/starry-night.jpg',
+              width: 960,
+              height: 760,
+              editable: true,
+              notes: notes,
+              onSave: onSave,
+              onDelete: onDelete,
+              onChange: onChange,
+              onLoad: onLoad,
+              onError: onError,
+            }),
+            h('h3', null, 'Event Log'),
+            h('div', { class: 'demo-status' }, log.value.join('\n') || null),
+            h('h3', null, 'Notes JSON'),
+            h('div', { class: 'demo-status' }, notesJson.value || null)
+          ]);
+        };
+      }
+    });
+
+    app.mount('#vue-root');
+  </script>
+</body>
+</html>

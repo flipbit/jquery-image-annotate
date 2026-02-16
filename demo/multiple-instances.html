@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiple Instances — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../dist/jquery.min.js"></script>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html" class="active">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+  </nav>
+  <div class="demo-content">
+    <h1>Multiple Instances</h1>
+    <p>Several annotated images on one page with different configurations. Instances are independent.</p>
+
+    <div class="demo-grid">
+      <div class="demo-section">
+        <h2>Editable with Notes</h2>
+        <p><code>editable: true</code>, pre-loaded static notes.</p>
+        <img id="multi-editable" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+      </div>
+
+      <div class="demo-section">
+        <h2>Read-Only with Notes</h2>
+        <p><code>editable: false</code>, different set of annotations.</p>
+        <img id="multi-readonly" src="images/mona-lisa.jpg" alt="Mona Lisa" width="960" height="1431">
+      </div>
+
+      <div class="demo-section">
+        <h2>Empty (Add from Scratch)</h2>
+        <p><code>editable: true</code>, no pre-loaded notes. Draw your own.</p>
+        <img id="multi-empty" src="images/great-wave.jpg" alt="The Great Wave" width="800" height="538">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(window).on('load', function() {
+      $('#multi-editable').annotateImage({
+        editable: true,
+        notes: [
+          { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "me-1", editable: true },
+          { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "me-2", editable: false }
+        ]
+      });
+
+      $('#multi-readonly').annotateImage({
+        editable: false,
+        notes: [
+          { top: 490, left: 350, width: 230, height: 80, text: "The enigmatic smile", id: "mr-1", editable: false },
+          { top: 700, left: 280, width: 350, height: 180, text: "Folded hands", id: "mr-2", editable: false }
+        ]
+      });
+
+      $('#multi-empty').annotateImage({
+        editable: true,
+        notes: []
+      });
+    });
+  </script>
+</body>
+</html>

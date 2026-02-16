@@ -1,0 +1,6 @@
+[
+  { "top": 490, "left": 350, "width": 230, "height": 80, "text": "The enigmatic smile", "id": "note-1", "editable": true },
+  { "top": 700, "left": 280, "width": 350, "height": 180, "text": "Folded hands", "id": "note-2", "editable": false },
+  { "top": 100, "left": 30, "width": 300, "height": 250, "text": "Background landscape (left)", "id": "note-3", "editable": true },
+  { "top": 120, "left": 630, "width": 280, "height": 230, "text": "Background landscape (right)", "id": "note-4", "editable": false }
+]
