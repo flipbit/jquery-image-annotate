@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery Basics — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../dist/jquery.min.js"></script>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html" class="active">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+  </nav>
+  <div class="demo-content">
+    <h1>jQuery Basics</h1>
+    <p>Initialize the plugin via <code>$.fn.annotateImage()</code> with static annotation data.</p>
+
+    <div class="demo-section">
+      <h2>Editable</h2>
+      <p>Global <code>editable: true</code>. Notes have mixed per-note editability. "Add Note" button visible.</p>
+      <img id="editable-image" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+    </div>
+
+    <div class="demo-section">
+      <h2>Read-Only</h2>
+      <p>Global <code>editable: false</code>. Same notes, but no "Add Note" button and no click-to-edit.</p>
+      <img id="readonly-image" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+    </div>
+  </div>
+
+  <script>
+    var notes = [
+      { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "note-1", editable: true },
+      { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "note-2", editable: false },
+      { top: 500, left: 150, width: 550, height: 200, text: "Village below", id: "note-3", editable: true },
+      { top: 30, left: 750, width: 120, height: 120, text: "Crescent moon", id: "note-4", editable: false }
+    ];
+
+    $(window).on('load', function() {
+      $('#editable-image').annotateImage({
+        editable: true,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+      $('#readonly-image').annotateImage({
+        editable: false,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+    });
+  </script>
+</body>
+</html>
