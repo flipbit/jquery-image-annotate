@@ -741,6 +741,33 @@ describe('auto-scaling — ResizeObserver', () => {
     expect(inst.scaleX).toBe(0.5);
     expect(inst.scaleY).toBe(0.5);
   });
+
+  test('no-op rescale with unchanged dimensions does not rebuild views', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+
+    // Get reference to original view DOM element
+    const originalArea = inst.viewOverlay.querySelector('.image-annotate-area');
+
+    // Fire callback with same dimensions
+    observeCallback!([{ contentRect: { width: 400, height: 300 } }]);
+
+    // View should NOT have been rebuilt — same DOM reference
+    const currentArea = inst.viewOverlay.querySelector('.image-annotate-area');
+    expect(currentArea).toBe(originalArea);
+  });
+
+  test('empty ResizeObserver entries does not crash', () => {
+    createScaledTestImage(400, 300, 400, 300);
+    expect(() => observeCallback!([])).not.toThrow();
+  });
+
+  test('zero-dimension entries does not crash or rescale', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    observeCallback!([{ contentRect: { width: 0, height: 0 } }]);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
 });
 
 describe('auto-scaling — scale factor computation', () => {
