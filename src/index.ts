@@ -16,6 +16,7 @@ export type { AnnotationNote, AnnotateImageOptions, AnnotateApi, AnnotateErrorCo
 const defaults: AnnotateImageOptions = {
   editable: true,
   notes: [],
+  autoResize: true,
   labels: { ...DEFAULT_LABELS },
 };
 
