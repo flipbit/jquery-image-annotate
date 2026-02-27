@@ -304,19 +304,16 @@ describe('auto-scaling — view positioning', () => {
     expect(view.area.style.top).toBe('100px');
   });
 
-  test('resetPosition converts rendered position back to natural coordinates', () => {
+  test('resetPosition copies natural coordinates from the edit note', () => {
     const inst = createScaledTestImage(400, 300, 200, 150);
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
     const view = new AnnotateView(inst, note);
 
+    // Simulate what the save handler does: convert rendered area coords to natural on the note
     const fakeEditable = {
       area: document.createElement('div'),
-      note: { ...note },
+      note: { ...note, top: 50, left: 100, width: 80, height: 60 },
     };
-    fakeEditable.area.style.left = '50px';
-    fakeEditable.area.style.top = '25px';
-    fakeEditable.area.style.width = '40px';
-    fakeEditable.area.style.height = '30px';
 
     view.resetPosition(fakeEditable as any, 'updated text');
 

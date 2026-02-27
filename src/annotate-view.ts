@@ -75,35 +75,32 @@ export class AnnotateView {
 
   /** Apply the note's position and dimensions to the area element, scaled to rendered size. */
   setPosition(): void {
-    const { scaleX, scaleY } = this.image;
+    const rendered = this.image.toRendered(this.note);
     const innerDiv = this.area.firstElementChild as HTMLElement;
-    innerDiv.style.height = (this.note.height * scaleY) + 'px';
-    innerDiv.style.width = (this.note.width * scaleX) + 'px';
-    this.area.style.left = (this.note.left * scaleX) + 'px';
-    this.area.style.top = (this.note.top * scaleY) + 'px';
+    innerDiv.style.height = rendered.height + 'px';
+    innerDiv.style.width = rendered.width + 'px';
+    this.area.style.left = rendered.left + 'px';
+    this.area.style.top = rendered.top + 'px';
   }
 
   /** Update the view's position, size, and text from the edit area after a save. */
   resetPosition(editable: { area: HTMLElement; note: AnnotationNote }, text: string): void {
-    const { scaleX, scaleY } = this.image;
     this.tooltip.textContent = text;
     this.tooltip.style.display = 'none';
 
-    const areaPos = readInlinePosition(editable.area);
-    const areaSize = readInlineSize(editable.area);
-
-    // Apply rendered coordinates to view DOM
+    // Position view DOM using the note's natural coordinates (already converted by edit)
+    const rendered = this.image.toRendered(editable.note);
     const innerDiv = this.area.firstElementChild as HTMLElement;
-    innerDiv.style.height = areaSize.height + 'px';
-    innerDiv.style.width = areaSize.width + 'px';
-    this.area.style.left = areaPos.left + 'px';
-    this.area.style.top = areaPos.top + 'px';
+    innerDiv.style.height = rendered.height + 'px';
+    innerDiv.style.width = rendered.width + 'px';
+    this.area.style.left = rendered.left + 'px';
+    this.area.style.top = rendered.top + 'px';
 
-    // Convert rendered coordinates back to natural for storage
-    this.note.top = areaPos.top / scaleY;
-    this.note.left = areaPos.left / scaleX;
-    this.note.height = areaSize.height / scaleY;
-    this.note.width = areaSize.width / scaleX;
+    // Copy natural coordinates from the edit note
+    this.note.top = editable.note.top;
+    this.note.left = editable.note.left;
+    this.note.height = editable.note.height;
+    this.note.width = editable.note.width;
     this.note.text = text;
     this.note.id = editable.note.id;
     this.editable = true;
