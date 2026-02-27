@@ -25,17 +25,16 @@ test.describe('jQuery Basics', () => {
 
   test('hover shows tooltip text', async ({ page }) => {
     const canvas = page.locator('.image-annotate-canvas').first();
-    // Areas are prepended, tooltips appended — last area = first tooltip
-    const lastArea = canvas.locator('.image-annotate-area').last();
-    const firstNote = canvas.locator('.image-annotate-note').first();
+    const area = canvas.locator('.image-annotate-area').last();
+    const tooltip = area.locator('.image-annotate-note');
 
-    await expect(firstNote).toBeHidden();
+    await expect(tooltip).toBeHidden();
 
     // Hover canvas to reveal overlay, then hover area for tooltip
     await canvas.hover();
-    await lastArea.hover();
+    await area.hover();
 
-    await expect(firstNote).toBeVisible();
+    await expect(tooltip).toBeVisible();
   });
 
   test('read-only image initializes with canvas', async ({ page }) => {

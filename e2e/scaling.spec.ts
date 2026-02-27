@@ -41,7 +41,8 @@ test.describe('Scaling', () => {
     const canvas = page.locator('.image-annotate-canvas').nth(1);
     const box = await canvas.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.width).toBeCloseTo(400, 0);
+    // Canvas bounding box includes the 1px border on each side
+    expect(box!.width).toBeCloseTo(402, 0);
   });
 
   test('responsive image: renders 4 annotations', async ({ page }) => {
