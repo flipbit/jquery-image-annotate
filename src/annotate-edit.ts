@@ -156,6 +156,7 @@ export class AnnotateEdit {
         }
         this.image.notifySave(stripInternals(this.note));
         this.destroy();
+        this.image.flushPendingRescale();
       };
 
       // Update note from current area position (convert rendered back to natural)
@@ -210,6 +211,7 @@ export class AnnotateEdit {
         const idx = this.image.notes.indexOf(this.note);
         if (idx !== -1) this.image.notes.splice(idx, 1);
         this.image.notifyDelete(stripInternals(this.note));
+        this.image.flushPendingRescale();
       };
 
       if (this.image.api.delete) {

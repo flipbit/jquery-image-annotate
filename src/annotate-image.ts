@@ -78,6 +78,7 @@ export class AnnotateImage {
   handlers: InteractionHandlers;
   activeEdit: AnnotateEdit | null = null;
   private destroyed = false;
+  private pendingRescale = false;
   private resizeObserver?: ResizeObserver;
   private originalParent: Node | null = null;
   private originalNextSibling: Node | null = null;
@@ -307,22 +308,40 @@ export class AnnotateImage {
       this.activeEdit.destroy();
       this.setMode('view');
     }
+    this.flushPendingRescale();
   }
 
-  /** Recompute scale factors and re-render all views for new container dimensions. */
+  /** Recompute scale factors, deferring if an edit is active. */
   private rescale(renderedWidth: number, renderedHeight: number): void {
+    if (this.mode === 'edit') {
+      this.pendingRescale = true;
+      return;
+    }
+    this.applyRescale(renderedWidth, renderedHeight);
+  }
+
+  /** Apply new scale factors and re-render all views. */
+  private applyRescale(renderedWidth: number, renderedHeight: number): void {
     const newScaleX = renderedWidth / this.naturalWidth;
     const newScaleY = renderedHeight / this.naturalHeight;
 
-    // Skip if nothing changed
     if (newScaleX === this.scaleX && newScaleY === this.scaleY) return;
 
     this.scaleX = newScaleX;
     this.scaleY = newScaleY;
 
-    // Rebuild views at new scale
     this.destroyViews();
     this.createViews();
+  }
+
+  /** @internal Flush any deferred rescale after an edit completes. */
+  flushPendingRescale(): void {
+    if (!this.pendingRescale) return;
+    this.pendingRescale = false;
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      this.applyRescale(rect.width, rect.height);
+    }
   }
 
   /** Replace all annotations with new data. Does not fire lifecycle callbacks. */

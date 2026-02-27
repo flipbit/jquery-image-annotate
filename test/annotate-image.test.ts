@@ -701,15 +701,45 @@ describe('auto-scaling — ResizeObserver', () => {
     expect(area.style.top).toBe('50px');
   });
 
-  test('resize cancels active edit', () => {
+  test('resize is deferred while editing (does not cancel edit)', () => {
     const inst = createScaledTestImage(400, 300, 400, 300);
     inst.add();
     expect(inst.mode).toBe('edit');
 
     observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
 
-    expect(inst.mode).toBe('view');
-    expect(inst.activeEdit).toBeNull();
+    // Edit should still be active
+    expect(inst.mode).toBe('edit');
+    expect(inst.activeEdit).not.toBeNull();
+    // Scale should NOT have changed yet
+    expect(inst.scaleX).toBe(1);
+  });
+
+  test('rescale is deferred while in edit mode', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+    expect(inst.scaleX).toBe(1);
+
+    // Enter edit mode
+    inst.add();
+    expect(inst.mode).toBe('edit');
+
+    // Simulate resize — should be deferred
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+    expect(inst.scaleX).toBe(1); // NOT updated yet
+
+    // Mock canvas getBoundingClientRect so flushPendingRescale can read new size
+    inst.canvas.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0,
+      right: 200, bottom: 150,
+      width: 200, height: 150,
+      toJSON() { return this; },
+    });
+
+    // Cancel edit — deferred rescale should now apply
+    inst.cancelEdit();
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
   });
 });
 
