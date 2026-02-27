@@ -78,6 +78,14 @@ export class AnnotateImage {
   handlers: InteractionHandlers;
   activeEdit: AnnotateEdit | null = null;
   private destroyed = false;
+  /** Natural (intrinsic) image width. */
+  readonly naturalWidth: number;
+  /** Natural (intrinsic) image height. */
+  readonly naturalHeight: number;
+  /** Current horizontal scale factor (rendered / natural). */
+  scaleX: number;
+  /** Current vertical scale factor (rendered / natural). */
+  scaleY: number;
 
   /**
    * @param img - Image element to annotate. Must be in the DOM with non-zero dimensions.
@@ -87,11 +95,20 @@ export class AnnotateImage {
     this.options = options;
     this.handlers = createDefaultHandlers();
     this.img = img;
-    const width = img.width;
-    const height = img.height;
-    if (width === 0 || height === 0) {
+
+    // Read natural and rendered dimensions
+    this.naturalWidth = img.naturalWidth || img.width;
+    this.naturalHeight = img.naturalHeight || img.height;
+    const rendered = img.getBoundingClientRect();
+    const renderedWidth = rendered.width || img.width;
+    const renderedHeight = rendered.height || img.height;
+
+    if (this.naturalWidth === 0 || this.naturalHeight === 0) {
       throw new Error('image-annotate: image must have non-zero dimensions (is the image loaded?)');
     }
+
+    this.scaleX = renderedWidth / this.naturalWidth;
+    this.scaleY = renderedHeight / this.naturalHeight;
     this.notes = options.notes.map(n => ({ ...n }));
 
     // Build canvas structure
@@ -118,13 +135,14 @@ export class AnnotateImage {
     img.parentNode.insertBefore(this.canvas, img.nextSibling);
 
     // Set dimensions and background
-    this.canvas.style.height = height + 'px';
-    this.canvas.style.width = width + 'px';
+    this.canvas.style.height = renderedHeight + 'px';
+    this.canvas.style.width = renderedWidth + 'px';
     this.canvas.style.backgroundImage = 'url("' + img.src + '")';
-    this.viewOverlay.style.height = height + 'px';
-    this.viewOverlay.style.width = width + 'px';
-    this.editOverlay.style.height = height + 'px';
-    this.editOverlay.style.width = width + 'px';
+    this.canvas.style.backgroundSize = '100% 100%';
+    this.viewOverlay.style.height = renderedHeight + 'px';
+    this.viewOverlay.style.width = renderedWidth + 'px';
+    this.editOverlay.style.height = renderedHeight + 'px';
+    this.editOverlay.style.width = renderedWidth + 'px';
 
     // Load notes
     this.api = this.options.api ? normalizeApi(this.options.api) : {};
