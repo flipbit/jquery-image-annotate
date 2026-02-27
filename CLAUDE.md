@@ -58,7 +58,7 @@ docs/                     - Migration plans and design documents
 
 ### Class Structure
 
-- **`AnnotateImage`** (`src/annotate-image.ts`) — Orchestrates the plugin. Creates canvas with view/edit overlays, loads annotations (static or via `fetch`), manages mode switching, creates icon-only "Add Note" button inside the canvas (hover-to-show, always visible on touch). Instance stored via `$(img).data('annotateImage')`.
+- **`AnnotateImage`** (`src/annotate-image.ts`) — Orchestrates the plugin. Wraps the target image in a canvas div with view/edit overlays (image provides intrinsic sizing, overlays use CSS `inset: 0`). Loads annotations (static or via `fetch`), manages mode switching, creates icon-only "Add Note" button inside the canvas (hover-to-show, always visible on touch). Coordinates stored in natural image pixels; `toRendered()`/`toNatural()` convert between natural and scaled coordinates. Rescale is deferred during active edits. Instance stored via `$(img).data('annotateImage')`.
 - **`AnnotateEdit`** (`src/annotate-edit.ts`) — Edit mode. Manages the draggable/resizable area (via injected `InteractionHandlers`), inline form with textarea, save/delete/cancel buttons. Uses `api.save`/`api.delete` callbacks for persistence.
 - **`AnnotateView`** (`src/annotate-view.ts`) — View mode. Renders annotation area + tooltip, hover show/hide, click-to-edit for editable annotations. Helper functions `readInlinePosition`/`readInlineSize` read from inline styles (jsdom-compatible).
 
@@ -69,7 +69,7 @@ docs/                     - Migration plans and design documents
 - `AnnotateImage` class (for typing/instanceof)
 - `AnnotationNote`, `AnnotateImageOptions` types
 
-Unified defaults (both core and jQuery): `editable: true`, `notes: []`.
+Unified defaults (both core and jQuery): `editable: true`, `notes: []`, `autoResize: true`.
 
 ### jQuery Adapter
 
