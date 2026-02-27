@@ -742,6 +742,35 @@ describe('auto-scaling — ResizeObserver', () => {
     expect(inst.scaleY).toBe(0.5);
   });
 
+  test('deferred rescale applies after edit save', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+
+    // Click-to-edit the note
+    const view = inst.notes[0].view!;
+    view.edit();
+    expect(inst.mode).toBe('edit');
+
+    // Simulate resize while editing
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+    expect(inst.scaleX).toBe(1); // Deferred
+
+    // Mock canvas getBoundingClientRect for flush
+    inst.canvas.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0,
+      right: 200, bottom: 150,
+      width: 200, height: 150,
+      toJSON() { return this; },
+    });
+
+    // Save the edit
+    const saveBtn = inst.canvas.querySelector('.image-annotate-edit-ok') as HTMLElement;
+    saveBtn.click();
+
+    // Rescale should have applied
+    expect(inst.scaleX).toBe(0.5);
+  });
+
   test('no-op rescale with unchanged dimensions does not rebuild views', () => {
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
     const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
