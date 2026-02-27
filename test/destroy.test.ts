@@ -12,13 +12,14 @@ describe('destroy()', () => {
     expect(document.querySelector('.image-annotate-canvas')).toBeNull();
   });
 
-  test('restores original image visibility', () => {
+  test('restores image to original DOM position', () => {
     const image = createTestImage();
     const inst = getInstance(image);
 
-    expect(image[0].style.display).toBe('none');
     inst.destroy();
-    expect(image[0].style.display).toBe('');
+    // Image should be back in document.body, not inside the canvas
+    expect(image[0].parentElement).toBe(document.body);
+    expect(document.querySelector('.image-annotate-canvas')).toBeNull();
   });
 
   test('removes "Add Note" button', () => {

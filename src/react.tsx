@@ -122,6 +122,10 @@ export const AnnotateImage = forwardRef<AnnotateImageRef, AnnotateImageProps>(
       getNotes() { return instanceRef.current?.getNotes() ?? []; },
     }));
 
-    return <img ref={imgRef} src={props.src} width={props.width} height={props.height} alt={props.alt} />;
+    return (
+      <span style={{ display: 'contents' }}>
+        <img ref={imgRef} src={props.src} width={props.width} height={props.height} alt={props.alt} />
+      </span>
+    );
   },
 );

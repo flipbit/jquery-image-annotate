@@ -79,6 +79,8 @@ export class AnnotateImage {
   activeEdit: AnnotateEdit | null = null;
   private destroyed = false;
   private resizeObserver?: ResizeObserver;
+  private originalParent: Node | null = null;
+  private originalNextSibling: Node | null = null;
   /** Natural (intrinsic) image width. */
   readonly naturalWidth: number;
   /** Natural (intrinsic) image height. */
@@ -137,7 +139,11 @@ export class AnnotateImage {
     this.scaleY = renderedHeight / this.naturalHeight;
     this.notes = options.notes.map(n => ({ ...n }));
 
-    // Build canvas structure
+    // Record original DOM position for destroy restoration
+    this.originalParent = img.parentNode;
+    this.originalNextSibling = img.nextSibling;
+
+    // Build canvas structure — wrap the image
     this.canvas = document.createElement('div');
     this.canvas.className = 'image-annotate-canvas';
 
@@ -151,24 +157,14 @@ export class AnnotateImage {
     editArea.className = 'image-annotate-edit-area';
     this.editOverlay.appendChild(editArea);
 
-    this.canvas.appendChild(this.viewOverlay);
-    this.canvas.appendChild(this.editOverlay);
-
-    // Insert canvas after the image
+    // Insert canvas at the image's original position, then move image inside
     if (!img.parentNode) {
       throw new Error('image-annotate: image must be in the DOM before initialization');
     }
-    img.parentNode.insertBefore(this.canvas, img.nextSibling);
-
-    // Set dimensions and background
-    this.canvas.style.height = renderedHeight + 'px';
-    this.canvas.style.width = renderedWidth + 'px';
-    this.canvas.style.backgroundImage = 'url("' + img.src + '")';
-    this.canvas.style.backgroundSize = '100% 100%';
-    this.viewOverlay.style.height = renderedHeight + 'px';
-    this.viewOverlay.style.width = renderedWidth + 'px';
-    this.editOverlay.style.height = renderedHeight + 'px';
-    this.editOverlay.style.width = renderedWidth + 'px';
+    img.parentNode.insertBefore(this.canvas, img);
+    this.canvas.appendChild(img);
+    this.canvas.appendChild(this.viewOverlay);
+    this.canvas.appendChild(this.editOverlay);
 
     // Load notes
     this.api = this.options.api ? normalizeApi(this.options.api) : {};
@@ -182,9 +178,6 @@ export class AnnotateImage {
     if (this.options.editable) {
       this.createButton();
     }
-
-    // Hide original image
-    img.style.display = 'none';
 
     // Set up ResizeObserver for dynamic resizing
     if (options.autoResize !== false && typeof ResizeObserver !== 'undefined') {
@@ -291,11 +284,21 @@ export class AnnotateImage {
       this.resizeObserver = undefined;
     }
 
+    // Restore image to its original DOM position.
+    // Guard against cases where the parent was already removed (e.g. React
+    // unmount removes the container before effect cleanup runs).
+    if (this.originalParent && this.originalParent.isConnected) {
+      // The original next sibling may have moved (e.g. another plugin instance
+      // wrapped it), so only use it as reference if it's still a child of the
+      // original parent.
+      const ref = this.originalNextSibling?.parentNode === this.originalParent
+        ? this.originalNextSibling
+        : null;
+      this.originalParent.insertBefore(this.img, ref);
+    }
+
     // Remove canvas from DOM
     this.canvas.remove();
-
-    // Restore original image
-    this.img.style.display = '';
   }
 
   /** Cancel the active edit (if any) and return to view mode. */
@@ -316,12 +319,6 @@ export class AnnotateImage {
 
     this.scaleX = newScaleX;
     this.scaleY = newScaleY;
-
-    // Update overlay dimensions
-    this.viewOverlay.style.height = renderedHeight + 'px';
-    this.viewOverlay.style.width = renderedWidth + 'px';
-    this.editOverlay.style.height = renderedHeight + 'px';
-    this.editOverlay.style.width = renderedWidth + 'px';
 
     // Rebuild views at new scale
     this.destroyViews();

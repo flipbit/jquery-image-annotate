@@ -17,11 +17,12 @@ describe('annotate() factory', () => {
     expect(document.querySelector('.image-annotate-canvas')).not.toBeNull();
   });
 
-  test('hides the original image', () => {
+  test('image is visible inside the canvas', () => {
     const img = createTestImageVanilla();
-    annotate(img);
+    const inst = annotate(img);
 
-    expect(img.style.display).toBe('none');
+    expect(img.style.display).not.toBe('none');
+    expect(img.parentElement).toBe(inst.canvas);
   });
 
   test('uses defaults when options are partial', () => {
@@ -112,13 +113,13 @@ describe('annotate() factory', () => {
     }).toThrow('image-annotate: image must have non-zero dimensions (is the image loaded?)');
   });
 
-  test('destroy() restores the image', () => {
+  test('destroy() restores the image to its original position', () => {
     const img = createTestImageVanilla();
     const inst = annotate(img);
 
-    expect(img.style.display).toBe('none');
+    expect(img.parentElement).toBe(inst.canvas);
     inst.destroy();
-    expect(img.style.display).toBe('');
+    expect(img.parentElement).toBe(document.body);
     expect(document.querySelector('.image-annotate-canvas')).toBeNull();
   });
 

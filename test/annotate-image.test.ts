@@ -17,26 +17,18 @@ describe('annotateImage — initialization', () => {
     expect(inst.canvas.querySelectorAll('.image-annotate-edit-area').length).toBe(1);
   });
 
-  test('canvas is inserted after the original image', () => {
+  test('canvas wraps the original image', () => {
     const image = createTestImage();
     const inst = getInstance(image);
 
-    const next = image[0].nextElementSibling;
-    expect(next).toBe(inst.canvas);
-    expect(next.classList.contains('image-annotate-canvas')).toBe(true);
+    expect(inst.canvas.contains(image[0])).toBe(true);
+    expect(image[0].parentElement).toBe(inst.canvas);
   });
 
-  test('sets canvas background-image from the img src', () => {
-    const image = createTestImage();
-    const inst = getInstance(image);
-
-    expect(inst.canvas.style.backgroundImage).toContain('test.jpg');
-  });
-
-  test('hides the original image', () => {
+  test('image is visible inside the canvas', () => {
     const image = createTestImage();
 
-    expect(image[0].style.display).toBe('none');
+    expect(image[0].style.display).not.toBe('none');
   });
 
   test('view overlay has no inline display style (CSS controls visibility)', () => {
@@ -740,15 +732,15 @@ describe('auto-scaling — scale factor computation', () => {
     expect(inst.scaleY).toBe(1);
   });
 
-  test('canvas dimensions match rendered size, not natural size', () => {
+  test('canvas does not set inline width/height (image provides sizing)', () => {
     const inst = createScaledTestImage(400, 300, 200, 150);
-    expect(inst.canvas.style.width).toBe('200px');
-    expect(inst.canvas.style.height).toBe('150px');
+    expect(inst.canvas.style.width).toBe('');
+    expect(inst.canvas.style.height).toBe('');
   });
 
-  test('canvas background-size is set to 100% 100%', () => {
+  test('canvas does not set background-image (image is visible child)', () => {
     const inst = createScaledTestImage(400, 300, 200, 150);
-    expect(inst.canvas.style.backgroundSize).toBe('100% 100%');
+    expect(inst.canvas.style.backgroundImage).toBe('');
   });
 
   test('naturalWidth and naturalHeight are stored', () => {
