@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
 import { createTestImage, getInstance } from './setup.ts';
 import { AnnotateImage } from '../src/annotate-image.ts';
@@ -654,6 +654,92 @@ describe('stripInternals', () => {
     expect(result).toEqual({ id: '1', top: 10, left: 20, width: 50, height: 50, text: 'Test' });
     expect('editable' in result).toBe(false);
     expect('view' in result).toBe(false);
+  });
+});
+
+describe('auto-scaling — ResizeObserver', () => {
+  let observeCallback: ((entries: any[]) => void) | null = null;
+  let disconnected = false;
+
+  beforeEach(() => {
+    observeCallback = null;
+    disconnected = false;
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(cb: (entries: any[]) => void) {
+        observeCallback = cb;
+      }
+      observe() {}
+      disconnect() { disconnected = true; }
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function createScaledImage(
+    naturalW: number, naturalH: number,
+    renderedW: number, renderedH: number,
+    options: Partial<AnnotateImageOptions> = {},
+  ): AnnotateImage {
+    document.body.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = 'test.jpg';
+    img.width = naturalW;
+    img.height = naturalH;
+    Object.defineProperty(img, 'naturalWidth', { value: naturalW, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: naturalH, configurable: true });
+    img.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0,
+      right: renderedW, bottom: renderedH,
+      width: renderedW, height: renderedH,
+      toJSON() { return this; },
+    });
+    document.body.appendChild(img);
+    return new AnnotateImage(img, { editable: true, notes: [], ...options });
+  }
+
+  test('ResizeObserver is attached by default (autoResize defaults to true)', () => {
+    createScaledImage(400, 300, 400, 300);
+    expect(observeCallback).not.toBeNull();
+  });
+
+  test('ResizeObserver is not attached when autoResize is false', () => {
+    createScaledImage(400, 300, 400, 300, { autoResize: false });
+    expect(observeCallback).toBeNull();
+  });
+
+  test('destroy disconnects ResizeObserver', () => {
+    const inst = createScaledImage(400, 300, 400, 300);
+    inst.destroy();
+    expect(disconnected).toBe(true);
+  });
+
+  test('resize callback updates scale factors and re-renders views', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledImage(400, 300, 400, 300, { notes: [note] });
+
+    expect(inst.scaleX).toBe(1);
+
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
+
+    const area = inst.viewOverlay.querySelector('.image-annotate-area') as HTMLElement;
+    expect(area.style.left).toBe('100px');
+    expect(area.style.top).toBe('50px');
+  });
+
+  test('resize cancels active edit', () => {
+    const inst = createScaledImage(400, 300, 400, 300);
+    inst.add();
+    expect(inst.mode).toBe('edit');
+
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+
+    expect(inst.mode).toBe('view');
+    expect(inst.activeEdit).toBeNull();
   });
 });
 

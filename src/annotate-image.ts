@@ -78,6 +78,7 @@ export class AnnotateImage {
   handlers: InteractionHandlers;
   activeEdit: AnnotateEdit | null = null;
   private destroyed = false;
+  private resizeObserver?: ResizeObserver;
   /** Natural (intrinsic) image width. */
   readonly naturalWidth: number;
   /** Natural (intrinsic) image height. */
@@ -159,6 +160,18 @@ export class AnnotateImage {
 
     // Hide original image
     img.style.display = 'none';
+
+    // Set up ResizeObserver for dynamic resizing
+    if (options.autoResize !== false && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const { width, height } = entry.contentRect;
+        if (width === 0 || height === 0) return;
+        this.rescale(width, height);
+      });
+      this.resizeObserver.observe(this.canvas);
+    }
   }
 
   /** Current interaction mode — 'view' for browsing, 'edit' when an annotation is being created or modified. */
@@ -247,6 +260,12 @@ export class AnnotateImage {
       this.button.remove();
     }
 
+    // Disconnect ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
+
     // Remove canvas from DOM
     this.canvas.remove();
 
@@ -260,6 +279,31 @@ export class AnnotateImage {
       this.activeEdit.destroy();
       this.setMode('view');
     }
+  }
+
+  /** Recompute scale factors and re-render all views for new container dimensions. */
+  private rescale(renderedWidth: number, renderedHeight: number): void {
+    const newScaleX = renderedWidth / this.naturalWidth;
+    const newScaleY = renderedHeight / this.naturalHeight;
+
+    // Skip if nothing changed
+    if (newScaleX === this.scaleX && newScaleY === this.scaleY) return;
+
+    this.scaleX = newScaleX;
+    this.scaleY = newScaleY;
+
+    // Cancel any active edit
+    this.cancelEdit();
+
+    // Update overlay dimensions
+    this.viewOverlay.style.height = renderedHeight + 'px';
+    this.viewOverlay.style.width = renderedWidth + 'px';
+    this.editOverlay.style.height = renderedHeight + 'px';
+    this.editOverlay.style.width = renderedWidth + 'px';
+
+    // Rebuild views at new scale
+    this.destroyViews();
+    this.createViews();
   }
 
   /** Replace all annotations with new data. Does not fire lifecycle callbacks. */
