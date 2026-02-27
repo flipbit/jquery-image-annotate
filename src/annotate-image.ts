@@ -88,6 +88,31 @@ export class AnnotateImage {
   /** Current vertical scale factor (rendered / natural). */
   scaleY: number;
 
+  /** Convert a rect from natural image coordinates to rendered (scaled) coordinates. */
+  toRendered(rect: { top: number; left: number; width: number; height: number }) {
+    return {
+      top: rect.top * this.scaleY,
+      left: rect.left * this.scaleX,
+      width: rect.width * this.scaleX,
+      height: rect.height * this.scaleY,
+    };
+  }
+
+  /** Convert a rect from rendered (scaled) coordinates to natural image coordinates. */
+  toNatural(rect: { top: number; left: number; width: number; height: number }) {
+    const result = {
+      top: rect.top / this.scaleY,
+      left: rect.left / this.scaleX,
+      width: rect.width / this.scaleX,
+      height: rect.height / this.scaleY,
+    };
+    if (!isFinite(result.top) || !isFinite(result.left) ||
+        !isFinite(result.width) || !isFinite(result.height)) {
+      throw new Error('image-annotate: scale conversion produced non-finite coordinates');
+    }
+    return result;
+  }
+
   /**
    * @param img - Image element to annotate. Must be in the DOM with non-zero dimensions.
    * @param options - Plugin configuration.

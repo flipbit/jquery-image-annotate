@@ -757,3 +757,48 @@ describe('auto-scaling — scale factor computation', () => {
     expect(inst.naturalHeight).toBe(760);
   });
 });
+
+describe('toRendered / toNatural coordinate conversion', () => {
+  test('toRendered scales natural coordinates by scale factors', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const result = inst.toRendered({ top: 100, left: 200, width: 80, height: 60 });
+    expect(result).toEqual({ top: 50, left: 100, width: 40, height: 30 });
+  });
+
+  test('toNatural reverses rendered coordinates to natural', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const result = inst.toNatural({ top: 50, left: 100, width: 40, height: 30 });
+    expect(result).toEqual({ top: 100, left: 200, width: 80, height: 60 });
+  });
+
+  test('toRendered is identity when scale is 1.0', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    const rect = { top: 100, left: 200, width: 80, height: 60 };
+    expect(inst.toRendered(rect)).toEqual(rect);
+  });
+
+  test('toNatural is identity when scale is 1.0', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    const rect = { top: 100, left: 200, width: 80, height: 60 };
+    expect(inst.toNatural(rect)).toEqual(rect);
+  });
+
+  test('toNatural throws on non-finite result (defense in depth)', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    // Force scaleX to 0 to trigger guard
+    inst.scaleX = 0;
+    expect(() => inst.toNatural({ top: 50, left: 100, width: 40, height: 30 }))
+      .toThrow('non-finite coordinates');
+  });
+
+  test('round-trip: toRendered then toNatural returns original values', () => {
+    const inst = createScaledTestImage(960, 760, 480, 380);
+    const original = { top: 80, left: 200, width: 100, height: 50 };
+    const rendered = inst.toRendered(original);
+    const restored = inst.toNatural(rendered);
+    expect(restored.top).toBeCloseTo(original.top);
+    expect(restored.left).toBeCloseTo(original.left);
+    expect(restored.width).toBeCloseTo(original.width);
+    expect(restored.height).toBeCloseTo(original.height);
+  });
+});
