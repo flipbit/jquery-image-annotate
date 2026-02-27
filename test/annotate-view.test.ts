@@ -1,6 +1,8 @@
 import { describe, test, expect } from 'vitest';
 import '../src/jquery.annotate.ts';
 import { createTestImage, getInstance } from './setup.ts';
+import { AnnotateImage } from '../src/annotate-image.ts';
+import { AnnotateView } from '../src/annotate-view.ts';
 import type { AnnotationNote } from '../src/types.ts';
 
 function createImageWithNote(noteOverrides: Partial<AnnotationNote> = {}) {
@@ -278,5 +280,69 @@ describe('annotateView — multiple annotations', () => {
     expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(1);
     expect(inst.viewOverlay.querySelectorAll('.image-annotate-note').length).toBe(1);
     expect(inst.viewOverlay.querySelector('.image-annotate-note').textContent).toBe('Keep');
+  });
+});
+
+describe('auto-scaling — view positioning', () => {
+  function createScaledInstance(scaleX: number, scaleY: number): AnnotateImage {
+    document.body.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = 'test.jpg';
+    img.width = 400;
+    img.height = 300;
+    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
+    img.getBoundingClientRect = () => ({
+      x: 0, y: 0,
+      left: 0, top: 0,
+      right: 400 * scaleX, bottom: 300 * scaleY,
+      width: 400 * scaleX, height: 300 * scaleY,
+      toJSON() { return this; },
+    });
+    document.body.appendChild(img);
+    return new AnnotateImage(img, { editable: true, notes: [] });
+  }
+
+  test('setPosition scales coordinates by scaleX/scaleY', () => {
+    const inst = createScaledInstance(0.5, 0.5);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    expect(view.area.style.left).toBe('100px');
+    expect(view.area.style.top).toBe('50px');
+    const inner = view.area.firstElementChild as HTMLElement;
+    expect(inner.style.width).toBe('40px');
+    expect(inner.style.height).toBe('30px');
+  });
+
+  test('at scale 1.0, positioning is unchanged', () => {
+    const inst = createScaledInstance(1, 1);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    expect(view.area.style.left).toBe('200px');
+    expect(view.area.style.top).toBe('100px');
+  });
+
+  test('resetPosition converts rendered position back to natural coordinates', () => {
+    const inst = createScaledInstance(0.5, 0.5);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    const fakeEditable = {
+      area: document.createElement('div'),
+      note: { ...note },
+    };
+    fakeEditable.area.style.left = '50px';
+    fakeEditable.area.style.top = '25px';
+    fakeEditable.area.style.width = '40px';
+    fakeEditable.area.style.height = '30px';
+
+    view.resetPosition(fakeEditable as any, 'updated text');
+
+    expect(view.note.left).toBe(100);
+    expect(view.note.top).toBe(50);
+    expect(view.note.width).toBe(80);
+    expect(view.note.height).toBe(60);
   });
 });

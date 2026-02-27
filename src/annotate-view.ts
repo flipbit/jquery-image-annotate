@@ -73,35 +73,37 @@ export class AnnotateView {
     }
   }
 
-  /** Apply the note's position and dimensions to the area element. */
+  /** Apply the note's position and dimensions to the area element, scaled to rendered size. */
   setPosition(): void {
+    const { scaleX, scaleY } = this.image;
     const innerDiv = this.area.firstElementChild as HTMLElement;
-    innerDiv.style.height = this.note.height + 'px';
-    innerDiv.style.width = this.note.width + 'px';
-    this.area.style.left = this.note.left + 'px';
-    this.area.style.top = this.note.top + 'px';
+    innerDiv.style.height = (this.note.height * scaleY) + 'px';
+    innerDiv.style.width = (this.note.width * scaleX) + 'px';
+    this.area.style.left = (this.note.left * scaleX) + 'px';
+    this.area.style.top = (this.note.top * scaleY) + 'px';
   }
 
   /** Update the view's position, size, and text from the edit area after a save. */
   resetPosition(editable: { area: HTMLElement; note: AnnotationNote }, text: string): void {
+    const { scaleX, scaleY } = this.image;
     this.tooltip.textContent = text;
     this.tooltip.style.display = 'none';
 
     const areaPos = readInlinePosition(editable.area);
     const areaSize = readInlineSize(editable.area);
 
-    // Resize inner div
+    // Apply rendered coordinates to view DOM
     const innerDiv = this.area.firstElementChild as HTMLElement;
     innerDiv.style.height = areaSize.height + 'px';
     innerDiv.style.width = areaSize.width + 'px';
     this.area.style.left = areaPos.left + 'px';
     this.area.style.top = areaPos.top + 'px';
 
-    // Save new position to note
-    this.note.top = areaPos.top;
-    this.note.left = areaPos.left;
-    this.note.height = areaSize.height;
-    this.note.width = areaSize.width;
+    // Convert rendered coordinates back to natural for storage
+    this.note.top = areaPos.top / scaleY;
+    this.note.left = areaPos.left / scaleX;
+    this.note.height = areaSize.height / scaleY;
+    this.note.width = areaSize.width / scaleX;
     this.note.text = text;
     this.note.id = editable.note.id;
     this.editable = true;
