@@ -80,7 +80,7 @@ export const AnnotateImage = forwardRef<AnnotateImageRef, AnnotateImageProps>(
       try {
         const instance = new AnnotateImageCore(imgRef.current, {
           editable: props.editable ?? true,
-          autoResize: props.autoResize,
+          autoResize: props.autoResize ?? true,
           notes: props.notes ? props.notes.slice() : [],
           onChange: (notes) => onChangeRef.current?.(notes),
           onSave: (note) => onSaveRef.current?.(note),

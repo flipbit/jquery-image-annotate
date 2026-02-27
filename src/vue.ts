@@ -26,7 +26,7 @@ export const AnnotateImage = defineComponent({
     /** Enable annotation editing. Default: true. */
     editable: { type: Boolean, default: true },
     /** Enable automatic re-scaling when the container resizes. Default: true. */
-    autoResize: { type: Boolean, default: undefined },
+    autoResize: { type: Boolean, default: true },
   },
 
   emits: {
