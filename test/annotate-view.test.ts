@@ -1,7 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance } from './setup.ts';
-import { AnnotateImage } from '../src/annotate-image.ts';
+import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
 import { AnnotateView } from '../src/annotate-view.ts';
 import type { AnnotationNote } from '../src/types.ts';
 
@@ -284,27 +283,8 @@ describe('annotateView — multiple annotations', () => {
 });
 
 describe('auto-scaling — view positioning', () => {
-  function createScaledInstance(scaleX: number, scaleY: number): AnnotateImage {
-    document.body.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = 'test.jpg';
-    img.width = 400;
-    img.height = 300;
-    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
-    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
-    img.getBoundingClientRect = () => ({
-      x: 0, y: 0,
-      left: 0, top: 0,
-      right: 400 * scaleX, bottom: 300 * scaleY,
-      width: 400 * scaleX, height: 300 * scaleY,
-      toJSON() { return this; },
-    });
-    document.body.appendChild(img);
-    return new AnnotateImage(img, { editable: true, notes: [] });
-  }
-
   test('setPosition scales coordinates by scaleX/scaleY', () => {
-    const inst = createScaledInstance(0.5, 0.5);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
     const view = new AnnotateView(inst, note);
 
@@ -316,7 +296,7 @@ describe('auto-scaling — view positioning', () => {
   });
 
   test('at scale 1.0, positioning is unchanged', () => {
-    const inst = createScaledInstance(1, 1);
+    const inst = createScaledTestImage(400, 300, 400, 300);
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
     const view = new AnnotateView(inst, note);
 
@@ -325,7 +305,7 @@ describe('auto-scaling — view positioning', () => {
   });
 
   test('resetPosition converts rendered position back to natural coordinates', () => {
-    const inst = createScaledInstance(0.5, 0.5);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
     const view = new AnnotateView(inst, note);
 

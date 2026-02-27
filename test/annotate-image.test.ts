@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance } from './setup.ts';
+import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
 import { AnnotateImage } from '../src/annotate-image.ts';
 import type { AnnotateImageOptions } from '../src/types.ts';
 import type { AnnotateView } from '../src/annotate-view';
@@ -677,47 +677,25 @@ describe('auto-scaling — ResizeObserver', () => {
     vi.unstubAllGlobals();
   });
 
-  function createScaledImage(
-    naturalW: number, naturalH: number,
-    renderedW: number, renderedH: number,
-    options: Partial<AnnotateImageOptions> = {},
-  ): AnnotateImage {
-    document.body.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = 'test.jpg';
-    img.width = naturalW;
-    img.height = naturalH;
-    Object.defineProperty(img, 'naturalWidth', { value: naturalW, configurable: true });
-    Object.defineProperty(img, 'naturalHeight', { value: naturalH, configurable: true });
-    img.getBoundingClientRect = () => ({
-      x: 0, y: 0, left: 0, top: 0,
-      right: renderedW, bottom: renderedH,
-      width: renderedW, height: renderedH,
-      toJSON() { return this; },
-    });
-    document.body.appendChild(img);
-    return new AnnotateImage(img, { editable: true, notes: [], ...options });
-  }
-
   test('ResizeObserver is attached by default (autoResize defaults to true)', () => {
-    createScaledImage(400, 300, 400, 300);
+    createScaledTestImage(400, 300, 400, 300);
     expect(observeCallback).not.toBeNull();
   });
 
   test('ResizeObserver is not attached when autoResize is false', () => {
-    createScaledImage(400, 300, 400, 300, { autoResize: false });
+    createScaledTestImage(400, 300, 400, 300, { autoResize: false });
     expect(observeCallback).toBeNull();
   });
 
   test('destroy disconnects ResizeObserver', () => {
-    const inst = createScaledImage(400, 300, 400, 300);
+    const inst = createScaledTestImage(400, 300, 400, 300);
     inst.destroy();
     expect(disconnected).toBe(true);
   });
 
   test('resize callback updates scale factors and re-renders views', () => {
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
-    const inst = createScaledImage(400, 300, 400, 300, { notes: [note] });
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
 
     expect(inst.scaleX).toBe(1);
 
@@ -732,7 +710,7 @@ describe('auto-scaling — ResizeObserver', () => {
   });
 
   test('resize cancels active edit', () => {
-    const inst = createScaledImage(400, 300, 400, 300);
+    const inst = createScaledTestImage(400, 300, 400, 300);
     inst.add();
     expect(inst.mode).toBe('edit');
 
@@ -744,59 +722,37 @@ describe('auto-scaling — ResizeObserver', () => {
 });
 
 describe('auto-scaling — scale factor computation', () => {
-  function createScaledImage(
-    naturalW: number, naturalH: number,
-    renderedW: number, renderedH: number,
-    options: Partial<AnnotateImageOptions> = {},
-  ): AnnotateImage {
-    document.body.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = 'test.jpg';
-    img.width = naturalW;
-    img.height = naturalH;
-    Object.defineProperty(img, 'naturalWidth', { value: naturalW, configurable: true });
-    Object.defineProperty(img, 'naturalHeight', { value: naturalH, configurable: true });
-    img.getBoundingClientRect = () => ({
-      x: 0, y: 0,
-      left: 0, top: 0, right: renderedW, bottom: renderedH,
-      width: renderedW, height: renderedH,
-      toJSON() { return this; },
-    });
-    document.body.appendChild(img);
-    return new AnnotateImage(img, { editable: true, notes: [], ...options });
-  }
-
   test('scale factors are 1.0 when rendered size matches natural size', () => {
-    const inst = createScaledImage(400, 300, 400, 300);
+    const inst = createScaledTestImage(400, 300, 400, 300);
     expect(inst.scaleX).toBe(1);
     expect(inst.scaleY).toBe(1);
   });
 
   test('scale factors are 0.5 when rendered at half size', () => {
-    const inst = createScaledImage(400, 300, 200, 150);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     expect(inst.scaleX).toBe(0.5);
     expect(inst.scaleY).toBe(0.5);
   });
 
   test('non-uniform scaling computes independent X/Y factors', () => {
-    const inst = createScaledImage(400, 300, 200, 300);
+    const inst = createScaledTestImage(400, 300, 200, 300);
     expect(inst.scaleX).toBe(0.5);
     expect(inst.scaleY).toBe(1);
   });
 
   test('canvas dimensions match rendered size, not natural size', () => {
-    const inst = createScaledImage(400, 300, 200, 150);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     expect(inst.canvas.style.width).toBe('200px');
     expect(inst.canvas.style.height).toBe('150px');
   });
 
   test('canvas background-size is set to 100% 100%', () => {
-    const inst = createScaledImage(400, 300, 200, 150);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     expect(inst.canvas.style.backgroundSize).toBe('100% 100%');
   });
 
   test('naturalWidth and naturalHeight are stored', () => {
-    const inst = createScaledImage(960, 760, 480, 380);
+    const inst = createScaledTestImage(960, 760, 480, 380);
     expect(inst.naturalWidth).toBe(960);
     expect(inst.naturalHeight).toBe(760);
   });

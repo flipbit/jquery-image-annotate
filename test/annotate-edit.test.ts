@@ -1,7 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance } from './setup.ts';
-import { AnnotateImage } from '../src/annotate-image.ts';
+import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
 
 describe('annotateEdit — creating a new annotation', () => {
   test('add() switches mode from view to edit', () => {
@@ -634,27 +633,8 @@ describe('activeEdit tracking', () => {
 });
 
 describe('auto-scaling — edit positioning', () => {
-  function createScaledInstance(scaleX: number, scaleY: number): AnnotateImage {
-    document.body.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = 'test.jpg';
-    img.width = 400;
-    img.height = 300;
-    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
-    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
-    img.getBoundingClientRect = () => ({
-      x: 0, y: 0,
-      left: 0, top: 0,
-      right: 400 * scaleX, bottom: 300 * scaleY,
-      width: 400 * scaleX, height: 300 * scaleY,
-      toJSON() { return this; },
-    });
-    document.body.appendChild(img);
-    return new AnnotateImage(img, { editable: true, notes: [] });
-  }
-
   test('new annotation edit area is scaled by scaleX/scaleY', () => {
-    const inst = createScaledInstance(0.5, 0.5);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     inst.add();
     const area = inst.editOverlay.querySelector('.image-annotate-edit-area') as HTMLElement;
 
@@ -667,7 +647,7 @@ describe('auto-scaling — edit positioning', () => {
 
   test('existing annotation edit area is scaled', () => {
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
-    const inst = createScaledInstance(0.5, 0.5);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     inst.notes = [{ ...note }];
     inst.load();
 
@@ -683,7 +663,7 @@ describe('auto-scaling — edit positioning', () => {
 
   test('save converts rendered coordinates back to natural', () => {
     const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
-    const inst = createScaledInstance(0.5, 0.5);
+    const inst = createScaledTestImage(400, 300, 200, 150);
     inst.notes = [{ ...note }];
     inst.load();
 

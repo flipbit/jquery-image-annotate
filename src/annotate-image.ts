@@ -292,9 +292,6 @@ export class AnnotateImage {
     this.scaleX = newScaleX;
     this.scaleY = newScaleY;
 
-    // Cancel any active edit
-    this.cancelEdit();
-
     // Update overlay dimensions
     this.viewOverlay.style.height = renderedHeight + 'px';
     this.viewOverlay.style.width = renderedWidth + 'px';
