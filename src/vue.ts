@@ -25,6 +25,8 @@ export const AnnotateImage = defineComponent({
     notes: { type: Array as () => AnnotationNote[] },
     /** Enable annotation editing. Default: true. */
     editable: { type: Boolean, default: true },
+    /** Enable automatic re-scaling when the container resizes. Default: true. */
+    autoResize: { type: Boolean, default: undefined },
   },
 
   emits: {
@@ -46,6 +48,7 @@ export const AnnotateImage = defineComponent({
       try {
         const instance = new AnnotateImageCore(imgRef.value, {
           editable: props.editable,
+          autoResize: props.autoResize,
           notes: props.notes ? props.notes.slice() : [],
           onChange: (notes) => {
             currentNotes.value = notes;
