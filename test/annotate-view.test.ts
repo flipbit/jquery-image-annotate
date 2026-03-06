@@ -315,7 +315,7 @@ describe('auto-scaling — view positioning', () => {
       note: { ...note, top: 50, left: 100, width: 80, height: 60 },
     };
 
-    view.resetPosition(fakeEditable as any, 'updated text');
+    view.resetPosition(fakeEditable, 'updated text');
 
     expect(view.note.left).toBe(100);
     expect(view.note.top).toBe(50);

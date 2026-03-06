@@ -109,8 +109,7 @@ export class AnnotateImage {
       width: rect.width / this.scaleX,
       height: rect.height / this.scaleY,
     };
-    if (!isFinite(result.top) || !isFinite(result.left) ||
-        !isFinite(result.width) || !isFinite(result.height)) {
+    if (!isFinite(result.top) || !isFinite(result.left) || !isFinite(result.width) || !isFinite(result.height)) {
       throw new Error('image-annotate: scale conversion produced non-finite coordinates');
     }
     return result;
@@ -138,7 +137,7 @@ export class AnnotateImage {
 
     this.scaleX = renderedWidth / this.naturalWidth;
     this.scaleY = renderedHeight / this.naturalHeight;
-    this.notes = options.notes.map(n => ({ ...n }));
+    this.notes = options.notes.map((n) => ({ ...n }));
 
     // Record original DOM position for destroy restoration
     this.originalParent = img.parentNode;
@@ -292,9 +291,7 @@ export class AnnotateImage {
       // The original next sibling may have moved (e.g. another plugin instance
       // wrapped it), so only use it as reference if it's still a child of the
       // original parent.
-      const ref = this.originalNextSibling?.parentNode === this.originalParent
-        ? this.originalNextSibling
-        : null;
+      const ref = this.originalNextSibling?.parentNode === this.originalParent ? this.originalNextSibling : null;
       this.originalParent.insertBefore(this.img, ref);
     }
 
@@ -348,7 +345,7 @@ export class AnnotateImage {
   setNotes(notes: AnnotationNote[]): void {
     if (this.destroyed) return;
     this.destroyViews();
-    this.notes = notes.map(n => ({ ...n }));
+    this.notes = notes.map((n) => ({ ...n }));
     this.createViews();
   }
 

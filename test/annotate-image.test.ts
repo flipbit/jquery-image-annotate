@@ -1,8 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
 import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
-import { AnnotateImage } from '../src/annotate-image.ts';
-import type { AnnotateImageOptions } from '../src/types.ts';
 import type { AnnotateView } from '../src/annotate-view';
 
 describe('annotateImage — initialization', () => {
@@ -650,19 +648,24 @@ describe('stripInternals', () => {
 });
 
 describe('auto-scaling — ResizeObserver', () => {
-  let observeCallback: ((entries: any[]) => void) | null = null;
+  let observeCallback: ((entries: ResizeObserverEntry[]) => void) | null = null;
   let disconnected = false;
 
   beforeEach(() => {
     observeCallback = null;
     disconnected = false;
-    vi.stubGlobal('ResizeObserver', class {
-      constructor(cb: (entries: any[]) => void) {
-        observeCallback = cb;
-      }
-      observe() {}
-      disconnect() { disconnected = true; }
-    });
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(cb: (entries: ResizeObserverEntry[]) => void) {
+          observeCallback = cb;
+        }
+        observe() {}
+        disconnect() {
+          disconnected = true;
+        }
+      },
+    );
   });
 
   afterEach(() => {
@@ -730,10 +733,17 @@ describe('auto-scaling — ResizeObserver', () => {
 
     // Mock canvas getBoundingClientRect so flushPendingRescale can read new size
     inst.canvas.getBoundingClientRect = () => ({
-      x: 0, y: 0, left: 0, top: 0,
-      right: 200, bottom: 150,
-      width: 200, height: 150,
-      toJSON() { return this; },
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 200,
+      bottom: 150,
+      width: 200,
+      height: 150,
+      toJSON() {
+        return this;
+      },
     });
 
     // Cancel edit — deferred rescale should now apply
@@ -757,10 +767,17 @@ describe('auto-scaling — ResizeObserver', () => {
 
     // Mock canvas getBoundingClientRect for flush
     inst.canvas.getBoundingClientRect = () => ({
-      x: 0, y: 0, left: 0, top: 0,
-      right: 200, bottom: 150,
-      width: 200, height: 150,
-      toJSON() { return this; },
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 200,
+      bottom: 150,
+      width: 200,
+      height: 150,
+      toJSON() {
+        return this;
+      },
     });
 
     // Save the edit
@@ -865,8 +882,7 @@ describe('toRendered / toNatural coordinate conversion', () => {
     const inst = createScaledTestImage(400, 300, 200, 150);
     // Force scaleX to 0 to trigger guard
     inst.scaleX = 0;
-    expect(() => inst.toNatural({ top: 50, left: 100, width: 40, height: 30 }))
-      .toThrow('non-finite coordinates');
+    expect(() => inst.toNatural({ top: 50, left: 100, width: 40, height: 30 })).toThrow('non-finite coordinates');
   });
 
   test('round-trip: toRendered then toNatural returns original values', () => {

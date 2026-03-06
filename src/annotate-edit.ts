@@ -163,8 +163,10 @@ export class AnnotateEdit {
       const pos = readInlinePosition(this.area);
       const size = readInlineSize(this.area);
       const natural = this.image.toNatural({
-        top: pos.top, left: pos.left,
-        width: size.width, height: size.height,
+        top: pos.top,
+        left: pos.left,
+        width: size.width,
+        height: size.height,
       });
       this.note.top = natural.top;
       this.note.left = natural.left;

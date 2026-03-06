@@ -55,8 +55,10 @@ export function createTestImageVanilla(): HTMLImageElement {
  * an initialized AnnotateImage instance. Use for testing scale behavior.
  */
 export function createScaledTestImage(
-  naturalW: number, naturalH: number,
-  renderedW: number, renderedH: number,
+  naturalW: number,
+  naturalH: number,
+  renderedW: number,
+  renderedH: number,
   options: Partial<AnnotateImageOptions> = {},
 ): AnnotateImage {
   document.body.innerHTML = '';
@@ -67,10 +69,17 @@ export function createScaledTestImage(
   Object.defineProperty(img, 'naturalWidth', { value: naturalW, configurable: true });
   Object.defineProperty(img, 'naturalHeight', { value: naturalH, configurable: true });
   img.getBoundingClientRect = () => ({
-    x: 0, y: 0, left: 0, top: 0,
-    right: renderedW, bottom: renderedH,
-    width: renderedW, height: renderedH,
-    toJSON() { return this; },
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: renderedW,
+    bottom: renderedH,
+    width: renderedW,
+    height: renderedH,
+    toJSON() {
+      return this;
+    },
   });
   document.body.appendChild(img);
   return new AnnotateImage(img, { editable: true, notes: [], ...options });
