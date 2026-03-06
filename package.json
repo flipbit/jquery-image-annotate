@@ -1,6 +1,6 @@
 {
   "name": "annotate-image",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "Create Flickr-like comment annotations on images — draw rectangles, add notes, save via AJAX or static data",
   "license": "GPL-2.0",
   "repository": {
