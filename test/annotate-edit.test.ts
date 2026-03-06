@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance } from './setup.ts';
+import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
 
 describe('annotateEdit — creating a new annotation', () => {
   test('add() switches mode from view to edit', () => {
@@ -629,5 +629,62 @@ describe('activeEdit tracking', () => {
 
     inst.canvas.querySelector('.image-annotate-edit-delete').click();
     expect(inst.activeEdit).toBeNull();
+  });
+});
+
+describe('auto-scaling — edit positioning', () => {
+  test('new annotation edit area is scaled by scaleX/scaleY', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    inst.add();
+    const area = inst.editOverlay.querySelector('.image-annotate-edit-area') as HTMLElement;
+
+    // DEFAULT_NOTE_LEFT=30 * 0.5 = 15, DEFAULT_NOTE_TOP=30 * 0.5 = 15
+    expect(area.style.left).toBe('15px');
+    expect(area.style.top).toBe('15px');
+    expect(area.style.width).toBe('15px');
+    expect(area.style.height).toBe('15px');
+  });
+
+  test('existing annotation edit area is scaled', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    inst.notes = [{ ...note }];
+    inst.load();
+
+    const view = inst.notes[0].view!;
+    view.edit();
+
+    const area = inst.editOverlay.querySelector('.image-annotate-edit-area') as HTMLElement;
+    expect(area.style.left).toBe('100px');
+    expect(area.style.top).toBe('50px');
+    expect(area.style.width).toBe('40px');
+    expect(area.style.height).toBe('30px');
+  });
+
+  test('save converts rendered coordinates back to natural', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    inst.notes = [{ ...note }];
+    inst.load();
+
+    const view = inst.notes[0].view!;
+    view.edit();
+
+    // Simulate dragging to a new rendered position
+    const area = inst.editOverlay.querySelector('.image-annotate-edit-area') as HTMLElement;
+    area.style.left = '50px';
+    area.style.top = '25px';
+    area.style.width = '40px';
+    area.style.height = '30px';
+
+    // Click save
+    const saveBtn = inst.canvas.querySelector('.image-annotate-edit-ok') as HTMLElement;
+    saveBtn.click();
+
+    // Stored note should be natural coordinates: 50/0.5=100, 25/0.5=50, 40/0.5=80, 30/0.5=60
+    expect(inst.notes[0].top).toBe(50);
+    expect(inst.notes[0].left).toBe(100);
+    expect(inst.notes[0].width).toBe(80);
+    expect(inst.notes[0].height).toBe(60);
   });
 });

@@ -78,6 +78,42 @@ export class AnnotateImage {
   handlers: InteractionHandlers;
   activeEdit: AnnotateEdit | null = null;
   private destroyed = false;
+  private pendingRescale = false;
+  private resizeObserver?: ResizeObserver;
+  private originalParent: Node | null = null;
+  private originalNextSibling: Node | null = null;
+  /** Natural (intrinsic) image width. */
+  readonly naturalWidth: number;
+  /** Natural (intrinsic) image height. */
+  readonly naturalHeight: number;
+  /** Current horizontal scale factor (rendered / natural). */
+  scaleX: number;
+  /** Current vertical scale factor (rendered / natural). */
+  scaleY: number;
+
+  /** Convert a rect from natural image coordinates to rendered (scaled) coordinates. */
+  toRendered(rect: { top: number; left: number; width: number; height: number }) {
+    return {
+      top: rect.top * this.scaleY,
+      left: rect.left * this.scaleX,
+      width: rect.width * this.scaleX,
+      height: rect.height * this.scaleY,
+    };
+  }
+
+  /** Convert a rect from rendered (scaled) coordinates to natural image coordinates. */
+  toNatural(rect: { top: number; left: number; width: number; height: number }) {
+    const result = {
+      top: rect.top / this.scaleY,
+      left: rect.left / this.scaleX,
+      width: rect.width / this.scaleX,
+      height: rect.height / this.scaleY,
+    };
+    if (!isFinite(result.top) || !isFinite(result.left) || !isFinite(result.width) || !isFinite(result.height)) {
+      throw new Error('image-annotate: scale conversion produced non-finite coordinates');
+    }
+    return result;
+  }
 
   /**
    * @param img - Image element to annotate. Must be in the DOM with non-zero dimensions.
@@ -87,14 +123,27 @@ export class AnnotateImage {
     this.options = options;
     this.handlers = createDefaultHandlers();
     this.img = img;
-    const width = img.width;
-    const height = img.height;
-    if (width === 0 || height === 0) {
+
+    // Read natural and rendered dimensions
+    this.naturalWidth = img.naturalWidth || img.width;
+    this.naturalHeight = img.naturalHeight || img.height;
+    const rendered = img.getBoundingClientRect();
+    const renderedWidth = rendered.width || img.width;
+    const renderedHeight = rendered.height || img.height;
+
+    if (this.naturalWidth === 0 || this.naturalHeight === 0) {
       throw new Error('image-annotate: image must have non-zero dimensions (is the image loaded?)');
     }
-    this.notes = options.notes.map(n => ({ ...n }));
 
-    // Build canvas structure
+    this.scaleX = renderedWidth / this.naturalWidth;
+    this.scaleY = renderedHeight / this.naturalHeight;
+    this.notes = options.notes.map((n) => ({ ...n }));
+
+    // Record original DOM position for destroy restoration
+    this.originalParent = img.parentNode;
+    this.originalNextSibling = img.nextSibling;
+
+    // Build canvas structure — wrap the image
     this.canvas = document.createElement('div');
     this.canvas.className = 'image-annotate-canvas';
 
@@ -108,23 +157,14 @@ export class AnnotateImage {
     editArea.className = 'image-annotate-edit-area';
     this.editOverlay.appendChild(editArea);
 
-    this.canvas.appendChild(this.viewOverlay);
-    this.canvas.appendChild(this.editOverlay);
-
-    // Insert canvas after the image
+    // Insert canvas at the image's original position, then move image inside
     if (!img.parentNode) {
       throw new Error('image-annotate: image must be in the DOM before initialization');
     }
-    img.parentNode.insertBefore(this.canvas, img.nextSibling);
-
-    // Set dimensions and background
-    this.canvas.style.height = height + 'px';
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.backgroundImage = 'url("' + img.src + '")';
-    this.viewOverlay.style.height = height + 'px';
-    this.viewOverlay.style.width = width + 'px';
-    this.editOverlay.style.height = height + 'px';
-    this.editOverlay.style.width = width + 'px';
+    img.parentNode.insertBefore(this.canvas, img);
+    this.canvas.appendChild(img);
+    this.canvas.appendChild(this.viewOverlay);
+    this.canvas.appendChild(this.editOverlay);
 
     // Load notes
     this.api = this.options.api ? normalizeApi(this.options.api) : {};
@@ -139,8 +179,17 @@ export class AnnotateImage {
       this.createButton();
     }
 
-    // Hide original image
-    img.style.display = 'none';
+    // Set up ResizeObserver for dynamic resizing
+    if (options.autoResize !== false && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const { width, height } = entry.contentRect;
+        if (width === 0 || height === 0) return;
+        this.rescale(width, height);
+      });
+      this.resizeObserver.observe(this.canvas);
+    }
   }
 
   /** Current interaction mode — 'view' for browsing, 'edit' when an annotation is being created or modified. */
@@ -229,11 +278,25 @@ export class AnnotateImage {
       this.button.remove();
     }
 
+    // Disconnect ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
+
+    // Restore image to its original DOM position.
+    // Guard against cases where the parent was already removed (e.g. React
+    // unmount removes the container before effect cleanup runs).
+    if (this.originalParent && this.originalParent.isConnected) {
+      // The original next sibling may have moved (e.g. another plugin instance
+      // wrapped it), so only use it as reference if it's still a child of the
+      // original parent.
+      const ref = this.originalNextSibling?.parentNode === this.originalParent ? this.originalNextSibling : null;
+      this.originalParent.insertBefore(this.img, ref);
+    }
+
     // Remove canvas from DOM
     this.canvas.remove();
-
-    // Restore original image
-    this.img.style.display = '';
   }
 
   /** Cancel the active edit (if any) and return to view mode. */
@@ -242,13 +305,47 @@ export class AnnotateImage {
       this.activeEdit.destroy();
       this.setMode('view');
     }
+    this.flushPendingRescale();
+  }
+
+  /** Recompute scale factors, deferring if an edit is active. */
+  private rescale(renderedWidth: number, renderedHeight: number): void {
+    if (this.mode === 'edit') {
+      this.pendingRescale = true;
+      return;
+    }
+    this.applyRescale(renderedWidth, renderedHeight);
+  }
+
+  /** Apply new scale factors and re-render all views. */
+  private applyRescale(renderedWidth: number, renderedHeight: number): void {
+    const newScaleX = renderedWidth / this.naturalWidth;
+    const newScaleY = renderedHeight / this.naturalHeight;
+
+    if (newScaleX === this.scaleX && newScaleY === this.scaleY) return;
+
+    this.scaleX = newScaleX;
+    this.scaleY = newScaleY;
+
+    this.destroyViews();
+    this.createViews();
+  }
+
+  /** @internal Flush any deferred rescale after an edit completes. */
+  flushPendingRescale(): void {
+    if (!this.pendingRescale) return;
+    this.pendingRescale = false;
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      this.applyRescale(rect.width, rect.height);
+    }
   }
 
   /** Replace all annotations with new data. Does not fire lifecycle callbacks. */
   setNotes(notes: AnnotationNote[]): void {
     if (this.destroyed) return;
     this.destroyViews();
-    this.notes = notes.map(n => ({ ...n }));
+    this.notes = notes.map((n) => ({ ...n }));
     this.createViews();
   }
 

@@ -41,6 +41,10 @@ jobs:
   publish:
     needs: verify
     runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -57,12 +61,10 @@ jobs:
       - name: Publish to npm
         run: |
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then
-            npm publish --tag beta
+            npm publish --provenance --access public --tag beta
           else
-            npm publish
+            npm publish --provenance --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   github-release:
     needs: publish

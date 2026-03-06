@@ -32,6 +32,8 @@ export interface AnnotateImageProps {
   onLoad?: (notes: NoteData[]) => void;
   /** Called when an operation fails. */
   onError?: (context: AnnotateErrorContext) => void;
+  /** Enable automatic re-scaling when the container resizes. Default: true. */
+  autoResize?: boolean;
 }
 
 /** Imperative methods exposed via ref. */
@@ -78,6 +80,7 @@ export const AnnotateImage = forwardRef<AnnotateImageRef, AnnotateImageProps>(
       try {
         const instance = new AnnotateImageCore(imgRef.current, {
           editable: props.editable ?? true,
+          autoResize: props.autoResize ?? true,
           notes: props.notes ? props.notes.slice() : [],
           onChange: (notes) => onChangeRef.current?.(notes),
           onSave: (note) => onSaveRef.current?.(note),
@@ -119,6 +122,10 @@ export const AnnotateImage = forwardRef<AnnotateImageRef, AnnotateImageProps>(
       getNotes() { return instanceRef.current?.getNotes() ?? []; },
     }));
 
-    return <img ref={imgRef} src={props.src} width={props.width} height={props.height} alt={props.alt} />;
+    return (
+      <span style={{ display: 'contents' }}>
+        <img ref={imgRef} src={props.src} width={props.width} height={props.height} alt={props.alt} />
+      </span>
+    );
   },
 );

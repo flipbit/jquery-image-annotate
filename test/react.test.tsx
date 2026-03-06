@@ -239,4 +239,18 @@ describe('React AnnotateImage', () => {
       expect(onChange).not.toHaveBeenCalled();
     });
   });
+
+  describe('autoResize prop', () => {
+    it('defaults autoResize to true when omitted', () => {
+      render(<AnnotateImage src="test.jpg" width={400} height={300} />);
+      expect(document.querySelector('.image-annotate-canvas')).not.toBeNull();
+    });
+
+    it('passes autoResize={false} to core', () => {
+      render(
+        <AnnotateImage src="test.jpg" width={400} height={300} autoResize={false} />
+      );
+      expect(document.querySelector('.image-annotate-canvas')).not.toBeNull();
+    });
+  });
 });

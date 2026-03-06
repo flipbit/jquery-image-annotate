@@ -1,6 +1,6 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance } from './setup.ts';
+import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
 import type { AnnotateView } from '../src/annotate-view';
 
 describe('annotateImage — initialization', () => {
@@ -15,26 +15,18 @@ describe('annotateImage — initialization', () => {
     expect(inst.canvas.querySelectorAll('.image-annotate-edit-area').length).toBe(1);
   });
 
-  test('canvas is inserted after the original image', () => {
+  test('canvas wraps the original image', () => {
     const image = createTestImage();
     const inst = getInstance(image);
 
-    const next = image[0].nextElementSibling;
-    expect(next).toBe(inst.canvas);
-    expect(next.classList.contains('image-annotate-canvas')).toBe(true);
+    expect(inst.canvas.contains(image[0])).toBe(true);
+    expect(image[0].parentElement).toBe(inst.canvas);
   });
 
-  test('sets canvas background-image from the img src', () => {
-    const image = createTestImage();
-    const inst = getInstance(image);
-
-    expect(inst.canvas.style.backgroundImage).toContain('test.jpg');
-  });
-
-  test('hides the original image', () => {
+  test('image is visible inside the canvas', () => {
     const image = createTestImage();
 
-    expect(image[0].style.display).toBe('none');
+    expect(image[0].style.display).not.toBe('none');
   });
 
   test('view overlay has no inline display style (CSS controls visibility)', () => {
@@ -652,5 +644,255 @@ describe('stripInternals', () => {
     expect(result).toEqual({ id: '1', top: 10, left: 20, width: 50, height: 50, text: 'Test' });
     expect('editable' in result).toBe(false);
     expect('view' in result).toBe(false);
+  });
+});
+
+describe('auto-scaling — ResizeObserver', () => {
+  let observeCallback: ((entries: ResizeObserverEntry[]) => void) | null = null;
+  let disconnected = false;
+
+  beforeEach(() => {
+    observeCallback = null;
+    disconnected = false;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(cb: (entries: ResizeObserverEntry[]) => void) {
+          observeCallback = cb;
+        }
+        observe() {}
+        disconnect() {
+          disconnected = true;
+        }
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test('ResizeObserver is attached by default (autoResize defaults to true)', () => {
+    createScaledTestImage(400, 300, 400, 300);
+    expect(observeCallback).not.toBeNull();
+  });
+
+  test('ResizeObserver is not attached when autoResize is false', () => {
+    createScaledTestImage(400, 300, 400, 300, { autoResize: false });
+    expect(observeCallback).toBeNull();
+  });
+
+  test('destroy disconnects ResizeObserver', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    inst.destroy();
+    expect(disconnected).toBe(true);
+  });
+
+  test('resize callback updates scale factors and re-renders views', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+
+    expect(inst.scaleX).toBe(1);
+
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
+
+    const area = inst.viewOverlay.querySelector('.image-annotate-area') as HTMLElement;
+    expect(area.style.left).toBe('100px');
+    expect(area.style.top).toBe('50px');
+  });
+
+  test('resize is deferred while editing (does not cancel edit)', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    inst.add();
+    expect(inst.mode).toBe('edit');
+
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+
+    // Edit should still be active
+    expect(inst.mode).toBe('edit');
+    expect(inst.activeEdit).not.toBeNull();
+    // Scale should NOT have changed yet
+    expect(inst.scaleX).toBe(1);
+  });
+
+  test('rescale is deferred while in edit mode', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+    expect(inst.scaleX).toBe(1);
+
+    // Enter edit mode
+    inst.add();
+    expect(inst.mode).toBe('edit');
+
+    // Simulate resize — should be deferred
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+    expect(inst.scaleX).toBe(1); // NOT updated yet
+
+    // Mock canvas getBoundingClientRect so flushPendingRescale can read new size
+    inst.canvas.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 200,
+      bottom: 150,
+      width: 200,
+      height: 150,
+      toJSON() {
+        return this;
+      },
+    });
+
+    // Cancel edit — deferred rescale should now apply
+    inst.cancelEdit();
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
+  });
+
+  test('deferred rescale applies after edit save', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+
+    // Click-to-edit the note
+    const view = inst.notes[0].view!;
+    view.edit();
+    expect(inst.mode).toBe('edit');
+
+    // Simulate resize while editing
+    observeCallback!([{ contentRect: { width: 200, height: 150 } }]);
+    expect(inst.scaleX).toBe(1); // Deferred
+
+    // Mock canvas getBoundingClientRect for flush
+    inst.canvas.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 200,
+      bottom: 150,
+      width: 200,
+      height: 150,
+      toJSON() {
+        return this;
+      },
+    });
+
+    // Save the edit
+    const saveBtn = inst.canvas.querySelector('.image-annotate-edit-ok') as HTMLElement;
+    saveBtn.click();
+
+    // Rescale should have applied
+    expect(inst.scaleX).toBe(0.5);
+  });
+
+  test('no-op rescale with unchanged dimensions does not rebuild views', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes: [note] });
+
+    // Get reference to original view DOM element
+    const originalArea = inst.viewOverlay.querySelector('.image-annotate-area');
+
+    // Fire callback with same dimensions
+    observeCallback!([{ contentRect: { width: 400, height: 300 } }]);
+
+    // View should NOT have been rebuilt — same DOM reference
+    const currentArea = inst.viewOverlay.querySelector('.image-annotate-area');
+    expect(currentArea).toBe(originalArea);
+  });
+
+  test('empty ResizeObserver entries does not crash', () => {
+    createScaledTestImage(400, 300, 400, 300);
+    expect(() => observeCallback!([])).not.toThrow();
+  });
+
+  test('zero-dimension entries does not crash or rescale', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    observeCallback!([{ contentRect: { width: 0, height: 0 } }]);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+});
+
+describe('auto-scaling — scale factor computation', () => {
+  test('scale factors are 1.0 when rendered size matches natural size', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('scale factors are 0.5 when rendered at half size', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
+  });
+
+  test('non-uniform scaling computes independent X/Y factors', () => {
+    const inst = createScaledTestImage(400, 300, 200, 300);
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('canvas does not set inline width/height (image provides sizing)', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    expect(inst.canvas.style.width).toBe('');
+    expect(inst.canvas.style.height).toBe('');
+  });
+
+  test('canvas does not set background-image (image is visible child)', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    expect(inst.canvas.style.backgroundImage).toBe('');
+  });
+
+  test('naturalWidth and naturalHeight are stored', () => {
+    const inst = createScaledTestImage(960, 760, 480, 380);
+    expect(inst.naturalWidth).toBe(960);
+    expect(inst.naturalHeight).toBe(760);
+  });
+});
+
+describe('toRendered / toNatural coordinate conversion', () => {
+  test('toRendered scales natural coordinates by scale factors', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const result = inst.toRendered({ top: 100, left: 200, width: 80, height: 60 });
+    expect(result).toEqual({ top: 50, left: 100, width: 40, height: 30 });
+  });
+
+  test('toNatural reverses rendered coordinates to natural', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const result = inst.toNatural({ top: 50, left: 100, width: 40, height: 30 });
+    expect(result).toEqual({ top: 100, left: 200, width: 80, height: 60 });
+  });
+
+  test('toRendered is identity when scale is 1.0', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    const rect = { top: 100, left: 200, width: 80, height: 60 };
+    expect(inst.toRendered(rect)).toEqual(rect);
+  });
+
+  test('toNatural is identity when scale is 1.0', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    const rect = { top: 100, left: 200, width: 80, height: 60 };
+    expect(inst.toNatural(rect)).toEqual(rect);
+  });
+
+  test('toNatural throws on non-finite result (defense in depth)', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    // Force scaleX to 0 to trigger guard
+    inst.scaleX = 0;
+    expect(() => inst.toNatural({ top: 50, left: 100, width: 40, height: 30 })).toThrow('non-finite coordinates');
+  });
+
+  test('round-trip: toRendered then toNatural returns original values', () => {
+    const inst = createScaledTestImage(960, 760, 480, 380);
+    const original = { top: 80, left: 200, width: 100, height: 50 };
+    const rendered = inst.toRendered(original);
+    const restored = inst.toNatural(rendered);
+    expect(restored.top).toBeCloseTo(original.top);
+    expect(restored.left).toBeCloseTo(original.left);
+    expect(restored.width).toBeCloseTo(original.width);
+    expect(restored.height).toBeCloseTo(original.height);
   });
 });

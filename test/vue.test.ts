@@ -242,4 +242,22 @@ describe('Vue AnnotateImage', () => {
       expect(wrapper.emitted('change') ?? []).toHaveLength(0);
     });
   });
+
+  describe('autoResize prop', () => {
+    it('defaults autoResize to true when omitted', () => {
+      wrapper = mount(AnnotateImage, {
+        ...mountOpts,
+        props: { src: 'test.jpg', width: 400, height: 300 },
+      });
+      expect(document.querySelector('.image-annotate-canvas')).not.toBeNull();
+    });
+
+    it('passes autoResize=false to core', () => {
+      wrapper = mount(AnnotateImage, {
+        ...mountOpts,
+        props: { src: 'test.jpg', width: 400, height: 300, autoResize: false },
+      });
+      expect(document.querySelector('.image-annotate-canvas')).not.toBeNull();
+    });
+  });
 });

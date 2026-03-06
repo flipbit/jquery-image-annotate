@@ -48,10 +48,11 @@ export class AnnotateEdit {
 
     // Set area (reuse the existing edit-area element inside the edit overlay)
     this.area = image.editOverlay.querySelector('.image-annotate-edit-area') as HTMLElement;
-    this.area.style.height = this.note.height + 'px';
-    this.area.style.width = this.note.width + 'px';
-    this.area.style.left = this.note.left + 'px';
-    this.area.style.top = this.note.top + 'px';
+    const rendered = image.toRendered(this.note);
+    this.area.style.height = rendered.height + 'px';
+    this.area.style.width = rendered.width + 'px';
+    this.area.style.left = rendered.left + 'px';
+    this.area.style.top = rendered.top + 'px';
 
     // Create the form
     this.form = document.createElement('div');
@@ -155,15 +156,22 @@ export class AnnotateEdit {
         }
         this.image.notifySave(stripInternals(this.note));
         this.destroy();
+        this.image.flushPendingRescale();
       };
 
-      // Update note from current area position
+      // Update note from current area position (convert rendered back to natural)
       const pos = readInlinePosition(this.area);
       const size = readInlineSize(this.area);
-      this.note.top = pos.top;
-      this.note.left = pos.left;
-      this.note.width = size.width;
-      this.note.height = size.height;
+      const natural = this.image.toNatural({
+        top: pos.top,
+        left: pos.left,
+        width: size.width,
+        height: size.height,
+      });
+      this.note.top = natural.top;
+      this.note.left = natural.left;
+      this.note.width = natural.width;
+      this.note.height = natural.height;
       this.note.text = text;
 
       if (this.image.api.save) {
@@ -205,6 +213,7 @@ export class AnnotateEdit {
         const idx = this.image.notes.indexOf(this.note);
         if (idx !== -1) this.image.notes.splice(idx, 1);
         this.image.notifyDelete(stripInternals(this.note));
+        this.image.flushPendingRescale();
       };
 
       if (this.image.api.delete) {

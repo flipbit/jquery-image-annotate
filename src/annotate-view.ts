@@ -73,13 +73,14 @@ export class AnnotateView {
     }
   }
 
-  /** Apply the note's position and dimensions to the area element. */
+  /** Apply the note's position and dimensions to the area element, scaled to rendered size. */
   setPosition(): void {
+    const rendered = this.image.toRendered(this.note);
     const innerDiv = this.area.firstElementChild as HTMLElement;
-    innerDiv.style.height = this.note.height + 'px';
-    innerDiv.style.width = this.note.width + 'px';
-    this.area.style.left = this.note.left + 'px';
-    this.area.style.top = this.note.top + 'px';
+    innerDiv.style.height = rendered.height + 'px';
+    innerDiv.style.width = rendered.width + 'px';
+    this.area.style.left = rendered.left + 'px';
+    this.area.style.top = rendered.top + 'px';
   }
 
   /** Update the view's position, size, and text from the edit area after a save. */
@@ -87,21 +88,19 @@ export class AnnotateView {
     this.tooltip.textContent = text;
     this.tooltip.style.display = 'none';
 
-    const areaPos = readInlinePosition(editable.area);
-    const areaSize = readInlineSize(editable.area);
-
-    // Resize inner div
+    // Position view DOM using the note's natural coordinates (already converted by edit)
+    const rendered = this.image.toRendered(editable.note);
     const innerDiv = this.area.firstElementChild as HTMLElement;
-    innerDiv.style.height = areaSize.height + 'px';
-    innerDiv.style.width = areaSize.width + 'px';
-    this.area.style.left = areaPos.left + 'px';
-    this.area.style.top = areaPos.top + 'px';
+    innerDiv.style.height = rendered.height + 'px';
+    innerDiv.style.width = rendered.width + 'px';
+    this.area.style.left = rendered.left + 'px';
+    this.area.style.top = rendered.top + 'px';
 
-    // Save new position to note
-    this.note.top = areaPos.top;
-    this.note.left = areaPos.left;
-    this.note.height = areaSize.height;
-    this.note.width = areaSize.width;
+    // Copy natural coordinates from the edit note
+    this.note.top = editable.note.top;
+    this.note.left = editable.note.left;
+    this.note.height = editable.note.height;
+    this.note.width = editable.note.width;
     this.note.text = text;
     this.note.id = editable.note.id;
     this.editable = true;

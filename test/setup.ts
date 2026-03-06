@@ -1,6 +1,6 @@
 import jquery from 'jquery';
 import { afterEach, vi } from 'vitest';
-import type { AnnotateImage } from '../src/annotate-image.ts';
+import { AnnotateImage } from '../src/annotate-image.ts';
 import type { AnnotateImageOptions } from '../src/types.ts';
 
 // Make jQuery available globally so the plugin adapter can find it
@@ -48,4 +48,39 @@ export function createTestImageVanilla(): HTMLImageElement {
   img.height = 300;
   document.body.appendChild(img);
   return img;
+}
+
+/**
+ * Creates an image with mocked natural/rendered dimensions and returns
+ * an initialized AnnotateImage instance. Use for testing scale behavior.
+ */
+export function createScaledTestImage(
+  naturalW: number,
+  naturalH: number,
+  renderedW: number,
+  renderedH: number,
+  options: Partial<AnnotateImageOptions> = {},
+): AnnotateImage {
+  document.body.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = 'test.jpg';
+  img.width = naturalW;
+  img.height = naturalH;
+  Object.defineProperty(img, 'naturalWidth', { value: naturalW, configurable: true });
+  Object.defineProperty(img, 'naturalHeight', { value: naturalH, configurable: true });
+  img.getBoundingClientRect = () => ({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: renderedW,
+    bottom: renderedH,
+    width: renderedW,
+    height: renderedH,
+    toJSON() {
+      return this;
+    },
+  });
+  document.body.appendChild(img);
+  return new AnnotateImage(img, { editable: true, notes: [], ...options });
 }

@@ -171,6 +171,7 @@ Creates an annotation layer on an image element. Returns an `AnnotateImage` inst
 | `onDelete` | `(note: NoteData) => void` | — | Called after a note is deleted |
 | `onLoad` | `(notes: NoteData[]) => void` | — | Called after notes are loaded |
 | `onError` | `(ctx: AnnotateErrorContext) => void` | — | Called on API errors (defaults to `console.error`) |
+| `autoResize` | `boolean` | `true` | Re-scale annotations when the container resizes |
 
 #### `AnnotateApi`
 
@@ -228,6 +229,7 @@ type NoteData = Omit<AnnotationNote, 'view' | 'editable'>;
 | `onDelete` | `(note: NoteData) => void` | — | Note deleted |
 | `onLoad` | `(notes: NoteData[]) => void` | — | Notes loaded |
 | `onError` | `(ctx: AnnotateErrorContext) => void` | — | Error occurred |
+| `autoResize` | `boolean` | `true` | Re-scale on container resize |
 
 #### Ref Methods (`AnnotateImageRef`)
 
@@ -249,6 +251,7 @@ type NoteData = Omit<AnnotationNote, 'view' | 'editable'>;
 | `height` | `Number` | — | Image height in pixels |
 | `notes` | `AnnotationNote[]` | — | Initial annotations |
 | `editable` | `Boolean` | `true` | Enable editing |
+| `autoResize` | `Boolean` | `true` | Re-scale on container resize |
 
 #### Emits
 
@@ -269,6 +272,28 @@ type NoteData = Omit<AnnotationNote, 'view' | 'editable'>;
 | `destroy()` | `void` | Tear down the instance |
 | `getNotes()` | `NoteData[]` | Get current annotations |
 | `notes` | `Ref<NoteData[]>` | Reactive current notes |
+
+## Scaling
+
+The plugin automatically detects the rendered image size and scales annotations accordingly. Annotation coordinates are always stored in natural (original) image pixels, so the same data works regardless of display size.
+
+- **CSS constraints** (e.g., `max-width: 500px`) are respected automatically
+- **HTML size attributes** (e.g., `width="400"`) work as expected
+- **Responsive layouts** are supported via `ResizeObserver` — annotations reposition when the container resizes
+- Set `autoResize: false` to disable dynamic resizing (annotations scale once at initialization)
+
+```js
+// Works automatically — no configuration needed
+annotate(document.getElementById('myImage'), {
+  notes: [/* coordinates in natural image pixels */],
+});
+
+// Disable dynamic resizing
+annotate(document.getElementById('myImage'), {
+  autoResize: false,
+  notes: [/* ... */],
+});
+```
 
 ## Tree Shaking
 

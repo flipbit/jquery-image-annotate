@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance } from './setup.ts';
+import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
+import { AnnotateView } from '../src/annotate-view.ts';
 import type { AnnotationNote } from '../src/types.ts';
 
 function createImageWithNote(noteOverrides: Partial<AnnotationNote> = {}) {
@@ -278,5 +279,47 @@ describe('annotateView — multiple annotations', () => {
     expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(1);
     expect(inst.viewOverlay.querySelectorAll('.image-annotate-note').length).toBe(1);
     expect(inst.viewOverlay.querySelector('.image-annotate-note').textContent).toBe('Keep');
+  });
+});
+
+describe('auto-scaling — view positioning', () => {
+  test('setPosition scales coordinates by scaleX/scaleY', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    expect(view.area.style.left).toBe('100px');
+    expect(view.area.style.top).toBe('50px');
+    const inner = view.area.firstElementChild as HTMLElement;
+    expect(inner.style.width).toBe('40px');
+    expect(inner.style.height).toBe('30px');
+  });
+
+  test('at scale 1.0, positioning is unchanged', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    expect(view.area.style.left).toBe('200px');
+    expect(view.area.style.top).toBe('100px');
+  });
+
+  test('resetPosition copies natural coordinates from the edit note', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    // Simulate what the save handler does: convert rendered area coords to natural on the note
+    const fakeEditable = {
+      area: document.createElement('div'),
+      note: { ...note, top: 50, left: 100, width: 80, height: 60 },
+    };
+
+    view.resetPosition(fakeEditable, 'updated text');
+
+    expect(view.note.left).toBe(100);
+    expect(view.note.top).toBe(50);
+    expect(view.note.width).toBe(80);
+    expect(view.note.height).toBe(60);
   });
 });

@@ -1,10 +1,16 @@
 {
   "name": "annotate-image",
-  "version": "2.0.0",
+  "version": "2.0.0-beta.2",
+  "description": "Create Flickr-like comment annotations on images — draw rectangles, add notes, save via AJAX or static data",
   "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flipbit/jquery-image-annotate.git"
+  },
   "files": [
     "dist/",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "main": "dist/core.js",
   "types": "dist/types/index.d.ts",

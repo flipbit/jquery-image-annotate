@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scaling — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <style>
+    .constrained-500 {
+      max-width: 500px;
+    }
+    .responsive-container {
+      width: 50%;
+      min-width: 200px;
+    }
+    .resize-hint {
+      color: #888;
+      font-size: 13px;
+      font-style: italic;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+    <a href="scaling.html" class="active">Scaling</a>
+  </nav>
+  <div class="demo-content">
+    <h1>Scaling</h1>
+    <p>Annotations scale automatically to match the rendered image size. Coordinates are always stored in natural (original) image pixels.</p>
+
+    <div class="demo-section">
+      <h2>CSS-Constrained (max-width: 500px)</h2>
+      <p>The image is 960&times;760 but constrained to 500px wide by CSS. Annotations scale proportionally.</p>
+      <div class="constrained-500">
+        <img id="css-constrained" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Explicit Smaller Attributes (width=400)</h2>
+      <p>The image is displayed at 400&times;317 via HTML attributes on a 960&times;760 original.</p>
+      <img id="explicit-size" src="images/starry-night.jpg" alt="Starry Night" width="400" height="317">
+    </div>
+
+    <div class="demo-section">
+      <h2>Responsive Container (50% width)</h2>
+      <p>The image fills 50% of the content area. Resize the browser window to see annotations reposition.</p>
+      <div class="responsive-container">
+        <img id="responsive" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760" style="max-width: 100%; height: auto;">
+      </div>
+      <p class="resize-hint">Try resizing the browser window.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { annotate } from '../dist/core.js';
+
+    const notes = [
+      { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "note-1", editable: true },
+      { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "note-2", editable: true },
+      { top: 500, left: 150, width: 550, height: 200, text: "Village below", id: "note-3", editable: true },
+      { top: 30, left: 750, width: 120, height: 120, text: "Crescent moon", id: "note-4", editable: true }
+    ];
+
+    window.addEventListener('load', function() {
+      annotate(document.getElementById('css-constrained'), {
+        editable: true,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+
+      annotate(document.getElementById('explicit-size'), {
+        editable: true,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+
+      annotate(document.getElementById('responsive'), {
+        editable: true,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+    });
+  </script>
+</body>
+</html>

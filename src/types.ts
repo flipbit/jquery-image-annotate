@@ -109,6 +109,9 @@ export interface AnnotateImageOptions {
 
   /** UI label overrides. Missing fields use built-in defaults. */
   labels?: Labels;
+
+  /** Attach a ResizeObserver to rescale annotations when the image resizes. Default: true. */
+  autoResize?: boolean;
 }
 
 export interface DragCallbacks {

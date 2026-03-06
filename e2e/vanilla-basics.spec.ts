@@ -26,21 +26,19 @@ test.describe('Vanilla Basics', () => {
 
   test('hover shows tooltip text', async ({ page }) => {
     const canvas = page.locator('.image-annotate-canvas').first();
-    // Areas are prepended (insertBefore firstChild) while tooltips are
-    // appended, so the last area in DOM corresponds to the first tooltip.
-    const lastArea = canvas.locator('.image-annotate-area').last();
-    const firstNote = canvas.locator('.image-annotate-note').first();
+    const area = canvas.locator('.image-annotate-area').last();
+    const tooltip = area.locator('.image-annotate-note');
 
     // Tooltip should be hidden before hover
-    await expect(firstNote).toBeHidden();
+    await expect(tooltip).toBeHidden();
 
     // Hover over the canvas to reveal the view overlay,
     // then hover over the annotation area to trigger the tooltip
     await canvas.hover();
-    await lastArea.hover();
+    await area.hover();
 
     // Tooltip should now be visible
-    await expect(firstNote).toBeVisible();
+    await expect(tooltip).toBeVisible();
   });
 
   test('read-only image initializes with canvas', async ({ page }) => {
