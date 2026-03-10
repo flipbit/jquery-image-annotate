@@ -11,24 +11,12 @@ import type {
 import { AnnotateView } from './annotate-view';
 import { AnnotateEdit } from './annotate-edit';
 import { createDefaultHandlers } from './interactions';
+import { clampNotes } from './positioning';
 
 /** Strip internal fields (view, editable) before passing to callbacks. */
 export function stripInternals(note: AnnotationNote): NoteData {
   const { view: _view, editable: _editable, ...data } = note;
   return data;
-}
-
-/** Clamp a note's size and position to fit within the given natural image dimensions. */
-export function clampNote(
-  note: { top: number; left: number; width: number; height: number },
-  naturalWidth: number,
-  naturalHeight: number,
-): { top: number; left: number; width: number; height: number } {
-  const width = Math.min(note.width, naturalWidth);
-  const height = Math.min(note.height, naturalHeight);
-  const left = Math.max(0, Math.min(note.left, naturalWidth - width));
-  const top = Math.max(0, Math.min(note.top, naturalHeight - height));
-  return { top, left, width, height };
 }
 
 /** Normalize api config: convert string URLs to default fetch functions. */
@@ -269,13 +257,7 @@ export class AnnotateImage {
   /** Rebuild annotation views from the current notes array. */
   load(): void {
     this.destroyViews();
-    for (const note of this.notes) {
-      const clamped = clampNote(note, this.naturalWidth, this.naturalHeight);
-      note.top = clamped.top;
-      note.left = clamped.left;
-      note.width = clamped.width;
-      note.height = clamped.height;
-    }
+    clampNotes(this.notes, this.naturalWidth, this.naturalHeight);
     this.createViews();
     this.notifyLoad();
   }
@@ -418,13 +400,7 @@ export class AnnotateImage {
       .then((notes) => {
         this.destroyViews();
         this.notes = notes;
-        for (const note of this.notes) {
-          const clamped = clampNote(note, this.naturalWidth, this.naturalHeight);
-          note.top = clamped.top;
-          note.left = clamped.left;
-          note.width = clamped.width;
-          note.height = clamped.height;
-        }
+        clampNotes(this.notes, this.naturalWidth, this.naturalHeight);
         this.createViews();
         this.notifyLoad();
       })

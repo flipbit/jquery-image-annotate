@@ -1,3 +1,27 @@
+/** Clamp a note's size and position to fit within the given natural image dimensions. */
+export function clampNote(
+  note: { top: number; left: number; width: number; height: number },
+  naturalWidth: number,
+  naturalHeight: number,
+): { top: number; left: number; width: number; height: number } {
+  const width = Math.min(note.width, naturalWidth);
+  const height = Math.min(note.height, naturalHeight);
+  const left = Math.max(0, Math.min(note.left, naturalWidth - width));
+  const top = Math.max(0, Math.min(note.top, naturalHeight - height));
+  return { top, left, width, height };
+}
+
+/** Clamp all notes in the array in place, constraining geometry to image bounds. */
+export function clampNotes(
+  notes: { top: number; left: number; width: number; height: number }[],
+  naturalWidth: number,
+  naturalHeight: number,
+): void {
+  for (const note of notes) {
+    Object.assign(note, clampNote(note, naturalWidth, naturalHeight));
+  }
+}
+
 /**
  * Compute the horizontal `left` value for a note/form element
  * relative to its parent annotation area, centering it under the area

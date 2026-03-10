@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { clampNote } from '../src/annotate-image';
+import { clampNote, clampNotes } from '../src/positioning';
 
 describe('clampNote — boundary clamping', () => {
   const W = 400;
@@ -76,5 +76,38 @@ describe('clampNote — boundary clamping', () => {
     const original = { ...note };
     clampNote(note, W, H);
     expect(note).toEqual(original);
+  });
+});
+
+describe('clampNotes — batch clamping', () => {
+  const W = 400;
+  const H = 300;
+
+  test('clamps all notes in the array in place', () => {
+    const notes = [
+      { top: 10, left: 20, width: 50, height: 50, text: 'inside', id: '1' },
+      { top: 500, left: 600, width: 50, height: 50, text: 'outside', id: '2' },
+    ];
+    clampNotes(notes, W, H);
+
+    expect(notes[0]).toMatchObject({ top: 10, left: 20, width: 50, height: 50 });
+    expect(notes[1]).toMatchObject({ top: 250, left: 350, width: 50, height: 50 });
+  });
+
+  test('preserves non-geometry properties on notes', () => {
+    const notes = [
+      { top: 500, left: 600, width: 50, height: 50, text: 'hello', id: '99', editable: true },
+    ];
+    clampNotes(notes, W, H);
+
+    expect(notes[0].text).toBe('hello');
+    expect(notes[0].id).toBe('99');
+    expect(notes[0].editable).toBe(true);
+  });
+
+  test('empty array is a no-op', () => {
+    const notes: { top: number; left: number; width: number; height: number }[] = [];
+    clampNotes(notes, W, H);
+    expect(notes).toEqual([]);
   });
 });
