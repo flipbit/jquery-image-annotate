@@ -350,10 +350,12 @@ Set on `.image-annotate-canvas`:
 | `--image-annotate-note-text` | `#000` | Tooltip text color |
 | `--image-annotate-note-radius` | `0` | Tooltip border-radius |
 | `--image-annotate-note-shadow` | `none` | Tooltip box-shadow |
+| `--image-annotate-note-max-width` | `300px` | Tooltip max width |
 | `--image-annotate-edit-bg` | `#fffee3` | Edit form background |
 | `--image-annotate-edit-border` | `#000` | Edit form border |
 | `--image-annotate-edit-radius` | `0` | Edit form border-radius |
 | `--image-annotate-edit-shadow` | `none` | Edit form box-shadow |
+| `--image-annotate-edit-max-width` | `300px` | Edit form max width |
 | `--image-annotate-button-bg` | `#fff` | Button background |
 | `--image-annotate-button-bg-hover` | `#eee` | Button hover background |
 | `--image-annotate-button-border` | `#ccc` | Button border |

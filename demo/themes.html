@@ -43,6 +43,8 @@
       --image-annotate-edit-border: #4a4a6a;
       --image-annotate-edit-radius: 6px;
       --image-annotate-edit-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      --image-annotate-note-max-width: 350px;
+      --image-annotate-edit-max-width: 350px;
       --image-annotate-button-bg: #2a2a3e;
       --image-annotate-button-bg-hover: #3a3a5e;
       --image-annotate-button-border: #4a4a6a;
@@ -66,6 +68,8 @@
       --image-annotate-edit-border: transparent;
       --image-annotate-edit-radius: 4px;
       --image-annotate-edit-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      --image-annotate-note-max-width: 280px;
+      --image-annotate-edit-max-width: 280px;
       --image-annotate-button-bg: #f8f8f8;
       --image-annotate-button-bg-hover: #eee;
       --image-annotate-button-border: #ddd;
@@ -120,6 +124,8 @@
   --image-annotate-edit-border: #4a4a6a;
   --image-annotate-edit-radius: 6px;
   --image-annotate-edit-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --image-annotate-note-max-width: 350px;
+  --image-annotate-edit-max-width: 350px;
   --image-annotate-button-bg: #2a2a3e;
   --image-annotate-button-bg-hover: #3a3a5e;
   --image-annotate-button-border: #4a4a6a;
@@ -147,6 +153,8 @@
   --image-annotate-edit-border: transparent;
   --image-annotate-edit-radius: 4px;
   --image-annotate-edit-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  --image-annotate-note-max-width: 280px;
+  --image-annotate-edit-max-width: 280px;
   --image-annotate-button-bg: #f8f8f8;
   --image-annotate-button-bg-hover: #eee;
   --image-annotate-button-border: #ddd;
@@ -157,9 +165,10 @@
 
   <script>
     var notes = [
-      { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "note-1", editable: true },
-      { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "note-2", editable: false },
-      { top: 500, left: 150, width: 550, height: 200, text: "Village below", id: "note-3", editable: true }
+      { top: 28, left: 117, width: 164, height: 553, text: "Cypress tree", id: "note-1", editable: true },
+      { top: 109, left: 338, width: 274, height: 266, text: "Swirl in the sky", id: "note-2", editable: false },
+      { top: 528, left: 349, width: 589, height: 207, text: "Village below", id: "note-3", editable: true },
+      { top: 47, left: 779, width: 167, height: 171, text: "Crescent Moon", id: "note-4", editable: false }
     ];
 
     $(window).on('load', function() {
