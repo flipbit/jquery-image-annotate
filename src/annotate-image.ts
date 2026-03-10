@@ -146,6 +146,9 @@ export class AnnotateImage {
     // Build canvas structure — wrap the image
     this.canvas = document.createElement('div');
     this.canvas.className = 'image-annotate-canvas';
+    if (options.theme) {
+      this.canvas.dataset.theme = options.theme;
+    }
 
     this.viewOverlay = document.createElement('div');
     this.viewOverlay.className = 'image-annotate-view';

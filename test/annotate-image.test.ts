@@ -650,10 +650,14 @@ describe('stripInternals', () => {
 describe('auto-scaling — ResizeObserver', () => {
   let observeCallback: ((entries: ResizeObserverEntry[]) => void) | null = null;
   let disconnected = false;
+  let originalResizeObserver: typeof ResizeObserver | undefined;
 
   beforeEach(() => {
     observeCallback = null;
     disconnected = false;
+    originalResizeObserver = (globalThis as Record<string, unknown>).ResizeObserver as
+      | typeof ResizeObserver
+      | undefined;
     vi.stubGlobal(
       'ResizeObserver',
       class {
@@ -669,7 +673,11 @@ describe('auto-scaling — ResizeObserver', () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    if (originalResizeObserver !== undefined) {
+      vi.stubGlobal('ResizeObserver', originalResizeObserver);
+    } else {
+      delete (globalThis as Record<string, unknown>).ResizeObserver;
+    }
   });
 
   test('ResizeObserver is attached by default (autoResize defaults to true)', () => {
@@ -894,5 +902,35 @@ describe('toRendered / toNatural coordinate conversion', () => {
     expect(restored.left).toBeCloseTo(original.left);
     expect(restored.width).toBeCloseTo(original.width);
     expect(restored.height).toBeCloseTo(original.height);
+  });
+});
+
+describe('theme option', () => {
+  test('sets data-theme attribute on canvas when theme is provided', () => {
+    const image = createTestImage({ theme: 'dark' });
+    const inst = getInstance(image);
+
+    expect(inst.canvas.getAttribute('data-theme')).toBe('dark');
+  });
+
+  test('does not set data-theme attribute when theme is omitted', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    expect(inst.canvas.hasAttribute('data-theme')).toBe(false);
+  });
+
+  test('does not set data-theme attribute when theme is empty string', () => {
+    const image = createTestImage({ theme: '' });
+    const inst = getInstance(image);
+
+    expect(inst.canvas.hasAttribute('data-theme')).toBe(false);
+  });
+
+  test('sets data-theme with custom theme name', () => {
+    const image = createTestImage({ theme: 'my-custom-theme' });
+    const inst = getInstance(image);
+
+    expect(inst.canvas.getAttribute('data-theme')).toBe('my-custom-theme');
   });
 });
