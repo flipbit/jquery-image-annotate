@@ -514,7 +514,7 @@ describe('annotateEdit — form positioning', () => {
     expect(form.parentElement).toBe(area);
   });
 
-  test('form has no inline top/left positioning', () => {
+  test('form gets inline left positioning but no inline top', () => {
     const image = createTestImage();
     const inst = getInstance(image);
 
@@ -522,7 +522,18 @@ describe('annotateEdit — form positioning', () => {
 
     const form = inst.canvas.querySelector('.image-annotate-edit-form') as HTMLElement;
     expect(form.style.top).toBe('');
-    expect(form.style.left).toBe('');
+    expect(form.style.left).not.toBe('');
+  });
+
+  test('form gets inline left positioning after creation', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    inst.add();
+
+    const form = inst.canvas.querySelector('.image-annotate-edit-form') as HTMLElement;
+    // In jsdom, getBoundingClientRect returns zeros, so left will be '0px'
+    expect(form.style.left).not.toBe('');
   });
 
   test('form position is consistent after a zero-distance drag', () => {

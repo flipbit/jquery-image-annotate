@@ -2,6 +2,7 @@ import type { AnnotationNote, InteractionHandlers } from './types';
 import type { AnnotateImage } from './annotate-image';
 import { stripInternals } from './annotate-image';
 import { AnnotateView, readInlinePosition, readInlineSize } from './annotate-view';
+import { computeNoteLeft } from './positioning';
 
 const DEFAULT_NOTE_TOP = 30;
 const DEFAULT_NOTE_LEFT = 30;
@@ -72,6 +73,17 @@ export class AnnotateEdit {
 
     this.area.appendChild(this.form);
 
+    // Position the form: render hidden, measure, compute centered left, then show
+    this.form.style.visibility = 'hidden';
+
+    const formRect = this.form.getBoundingClientRect();
+    const areaRect = this.area.getBoundingClientRect();
+    const formLeft = computeNoteLeft(formRect.width, areaRect.left, areaRect.width, window.innerWidth);
+    this.form.style.left = formLeft + 'px';
+
+    this.form.style.visibility = '';
+    this.textarea.focus();
+
     // Prevent pointer events on the form from triggering the area's drag handler
     this.form.addEventListener('pointerdown', (e) => e.stopPropagation());
 
@@ -99,8 +111,6 @@ export class AnnotateEdit {
         area.style.top = pos.top + 'px';
       },
     });
-
-    this.textarea.focus();
 
     this.form.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
