@@ -269,6 +269,13 @@ export class AnnotateImage {
   /** Rebuild annotation views from the current notes array. */
   load(): void {
     this.destroyViews();
+    for (const note of this.notes) {
+      const clamped = clampNote(note, this.naturalWidth, this.naturalHeight);
+      note.top = clamped.top;
+      note.left = clamped.left;
+      note.width = clamped.width;
+      note.height = clamped.height;
+    }
     this.createViews();
     this.notifyLoad();
   }
@@ -411,6 +418,13 @@ export class AnnotateImage {
       .then((notes) => {
         this.destroyViews();
         this.notes = notes;
+        for (const note of this.notes) {
+          const clamped = clampNote(note, this.naturalWidth, this.naturalHeight);
+          note.top = clamped.top;
+          note.left = clamped.left;
+          note.width = clamped.width;
+          note.height = clamped.height;
+        }
         this.createViews();
         this.notifyLoad();
       })

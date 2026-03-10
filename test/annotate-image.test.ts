@@ -934,3 +934,42 @@ describe('theme option', () => {
     expect(inst.canvas.getAttribute('data-theme')).toBe('my-custom-theme');
   });
 });
+
+describe('load() — boundary clamping', () => {
+  test('static notes exceeding image bounds are clamped on load', () => {
+    // Image is 400x300
+    const notes = [
+      { top: 280, left: 380, width: 50, height: 50, text: 'Overflow', id: '1', editable: false },
+    ];
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes });
+
+    expect(inst.notes[0].top).toBe(250);  // 300 - 50
+    expect(inst.notes[0].left).toBe(350); // 400 - 50
+    expect(inst.notes[0].width).toBe(50);
+    expect(inst.notes[0].height).toBe(50);
+  });
+
+  test('notes larger than image are clamped to image dimensions', () => {
+    const notes = [
+      { top: 10, left: 10, width: 500, height: 400, text: 'Too big', id: '1', editable: false },
+    ];
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes });
+
+    expect(inst.notes[0].width).toBe(400);
+    expect(inst.notes[0].height).toBe(300);
+    expect(inst.notes[0].left).toBe(0);
+    expect(inst.notes[0].top).toBe(0);
+  });
+
+  test('notes within bounds are not modified', () => {
+    const notes = [
+      { top: 10, left: 20, width: 50, height: 50, text: 'OK', id: '1', editable: false },
+    ];
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes });
+
+    expect(inst.notes[0].top).toBe(10);
+    expect(inst.notes[0].left).toBe(20);
+    expect(inst.notes[0].width).toBe(50);
+    expect(inst.notes[0].height).toBe(50);
+  });
+});
