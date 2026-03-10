@@ -73,15 +73,8 @@ export class AnnotateEdit {
 
     this.area.appendChild(this.form);
 
-    // Position the form: render hidden, measure, compute centered left, then show
-    this.form.style.visibility = 'hidden';
-
-    const formRect = this.form.getBoundingClientRect();
-    const areaRect = this.area.getBoundingClientRect();
-    const formLeft = computeNoteLeft(formRect.width, areaRect.left, areaRect.width, window.innerWidth);
-    this.form.style.left = formLeft + 'px';
-
-    this.form.style.visibility = '';
+    // Position the form centered under the area, clamped to viewport
+    this.positionForm();
     this.textarea.focus();
 
     // Prevent pointer events on the form from triggering the area's drag handler
@@ -98,7 +91,10 @@ export class AnnotateEdit {
     this.handlers.makeResizable(area, {
       containment: image.canvas,
       onResize: applyRect,
-      onStop: applyRect,
+      onStop: (rect) => {
+        applyRect(rect);
+        this.positionForm();
+      },
     });
     this.handlers.makeDraggable(area, {
       containment: image.canvas,
@@ -109,6 +105,7 @@ export class AnnotateEdit {
       onStop: (pos) => {
         area.style.left = pos.left + 'px';
         area.style.top = pos.top + 'px';
+        this.positionForm();
       },
     });
 
@@ -129,6 +126,14 @@ export class AnnotateEdit {
       this.addDeleteButton(buttonRow, existingView);
     }
     this.addCancelButton(buttonRow);
+  }
+
+  /** Recompute the form's horizontal position relative to the area. */
+  private positionForm(): void {
+    const formRect = this.form.getBoundingClientRect();
+    const areaRect = this.area.getBoundingClientRect();
+    const left = computeNoteLeft(formRect.width, areaRect.left, areaRect.width, window.innerWidth);
+    this.form.style.left = left + 'px';
   }
 
   /** Tear down the edit form and interaction handlers. */
