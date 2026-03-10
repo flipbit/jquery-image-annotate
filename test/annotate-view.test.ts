@@ -63,9 +63,10 @@ describe('annotateView — positioning', () => {
     expect(innerDiv.style.width).toBe('80px');
   });
 
-  test('tooltip has no inline positioning (CSS handles it)', () => {
+  test('tooltip has no inline positioning at construction (set on show)', () => {
     const { view } = createImageWithNote({ top: 50, left: 100, height: 60 });
 
+    // Before show() is called, no inline left/top
     expect(view.tooltip.style.top).toBe('');
     expect(view.tooltip.style.left).toBe('');
   });
@@ -97,6 +98,28 @@ describe('annotateView — tooltip positioning', () => {
     const { view } = createImageWithNote();
 
     expect(view.tooltip.parentElement).toBe(view.area);
+  });
+});
+
+describe('annotateView — smart tooltip positioning', () => {
+  test('show() sets inline left on tooltip', () => {
+    const { view } = createImageWithNote();
+
+    view.show();
+
+    // In jsdom, getBoundingClientRect returns zeros, so computeNoteLeft(0, 0, 0, 0) = 0
+    // The important thing is that an inline left IS set
+    expect(view.tooltip.style.left).not.toBe('');
+  });
+
+  test('hide() does not clear inline left (left persists for next show)', () => {
+    const { view } = createImageWithNote();
+
+    view.show();
+    view.hide();
+
+    // Left style remains set from the last show()
+    expect(view.tooltip.style.left).not.toBe('');
   });
 });
 
