@@ -172,6 +172,7 @@ Creates an annotation layer on an image element. Returns an `AnnotateImage` inst
 | `onLoad` | `(notes: NoteData[]) => void` | — | Called after notes are loaded |
 | `onError` | `(ctx: AnnotateErrorContext) => void` | — | Called on API errors (defaults to `console.error`) |
 | `autoResize` | `boolean` | `true` | Re-scale annotations when the container resizes |
+| `theme` | `string` | — | CSS theme name; sets `data-theme` on the canvas for variable scoping |
 
 #### `AnnotateApi`
 
@@ -295,6 +296,71 @@ annotate(document.getElementById('myImage'), {
 });
 ```
 
+## Theming
+
+The plugin uses CSS custom properties for all visual styling. Override these variables in your CSS to create custom themes.
+
+### Using the `theme` option
+
+Set `theme` in options to add a `data-theme` attribute to the canvas element, enabling CSS scoping:
+
+```js
+annotate(document.getElementById('myImage'), {
+  theme: 'dark',
+  notes: [/* ... */],
+});
+```
+
+```css
+.image-annotate-canvas[data-theme="dark"] {
+  --image-annotate-area-border: rgba(255, 255, 255, 0.7);
+  --image-annotate-area-bg: rgba(100, 149, 237, 0.15);
+  --image-annotate-note-bg: #2a2a3e;
+  --image-annotate-note-text: #e0e0f0;
+  --image-annotate-note-radius: 4px;
+  --image-annotate-note-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  /* ... see demo for full example */
+}
+```
+
+Multiple instances on the same page can use different themes.
+
+### Available CSS variables
+
+Set on `.image-annotate-canvas`:
+
+| Variable | Default | Description |
+|---|---|---|
+| `--image-annotate-canvas-border` | `none` | Border around the canvas |
+| `--image-annotate-font-family` | `Verdana, sans-serif` | Font for notes and buttons |
+| `--image-annotate-font-size` | `12px` | Font size for notes and buttons |
+| `--image-annotate-area-border` | `#000` | Annotation rectangle border color |
+| `--image-annotate-area-inner-border` | `#fff` | Annotation inner border color |
+| `--image-annotate-area-bg` | `transparent` | Annotation rectangle fill |
+| `--image-annotate-area-border-width` | `1px` | Annotation border thickness |
+| `--image-annotate-area-border-style` | `solid` | Annotation border style |
+| `--image-annotate-area-radius` | `0` | Annotation border-radius |
+| `--image-annotate-hover-color` | `yellow` | Hover border color (read-only) |
+| `--image-annotate-hover-editable-color` | `#00ad00` | Hover border color (editable) |
+| `--image-annotate-hover-bg` | `transparent` | Hover background fill |
+| `--image-annotate-note-bg` | `#e7ffe7` | Tooltip background |
+| `--image-annotate-note-border` | `#397f39` | Tooltip border |
+| `--image-annotate-note-text` | `#000` | Tooltip text color |
+| `--image-annotate-note-radius` | `0` | Tooltip border-radius |
+| `--image-annotate-note-shadow` | `none` | Tooltip box-shadow |
+| `--image-annotate-edit-bg` | `#fffee3` | Edit form background |
+| `--image-annotate-edit-border` | `#000` | Edit form border |
+| `--image-annotate-edit-radius` | `0` | Edit form border-radius |
+| `--image-annotate-edit-shadow` | `none` | Edit form box-shadow |
+| `--image-annotate-button-bg` | `#fff` | Button background |
+| `--image-annotate-button-bg-hover` | `#eee` | Button hover background |
+| `--image-annotate-button-border` | `#ccc` | Button border |
+| `--image-annotate-button-text` | `#000` | Button text color |
+| `--image-annotate-add-bg` | `rgba(0,0,0,0.4)` | Add Note button background |
+| `--image-annotate-add-bg-hover` | `rgba(0,0,0,0.6)` | Add Note button hover background |
+| `--image-annotate-add-border` | `1px solid rgba(255,255,255,0.5)` | Add Note button border |
+| `--image-annotate-add-radius` | `4px` | Add Note button border-radius |
+
 ## Tree Shaking
 
 Each entry point (`annotate-image`, `annotate-image/jquery`, `annotate-image/react`, `annotate-image/vue`) is a separate bundle. Importing one does not pull in the others. Unused framework adapters are excluded automatically by bundlers that support package `exports`.
@@ -332,7 +398,7 @@ Run the demo server locally:
 npm run demo
 ```
 
-This opens a browser at `http://localhost:8080/demo/index.html` with links to demos including static annotations, AJAX loading, vanilla JS, React, Vue, and multiple instances.
+This opens a browser at `http://localhost:8080/demo/index.html` with links to demos including static annotations, AJAX loading, vanilla JS, React, Vue, multiple instances, and CSS theming.
 
 ## Build
 
