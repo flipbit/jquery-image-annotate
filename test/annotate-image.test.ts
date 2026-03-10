@@ -972,4 +972,22 @@ describe('load() — boundary clamping', () => {
     expect(inst.notes[0].width).toBe(50);
     expect(inst.notes[0].height).toBe(50);
   });
+
+  test('API-loaded notes exceeding bounds are clamped', async () => {
+    const notes = [
+      { top: 500, left: 600, width: 50, height: 50, text: 'API overflow', id: '1', editable: true },
+    ];
+    const loadFn = vi.fn(() => Promise.resolve(notes));
+
+    const inst = createScaledTestImage(400, 300, 400, 300, {
+      api: { load: loadFn },
+    });
+
+    await vi.waitFor(() => {
+      expect(inst.notes.length).toBe(1);
+    });
+
+    expect(inst.notes[0].top).toBe(250);  // 300 - 50
+    expect(inst.notes[0].left).toBe(350); // 400 - 50
+  });
 });
