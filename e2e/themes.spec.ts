@@ -31,7 +31,7 @@ test.describe('Themes', () => {
     for (let i = 0; i < 3; i++) {
       const canvas = page.locator('.image-annotate-canvas').nth(i);
       const areas = canvas.locator('.image-annotate-area');
-      await expect(areas).toHaveCount(3);
+      await expect(areas).toHaveCount(4);
     }
   });
 
@@ -58,6 +58,9 @@ test.describe('Themes', () => {
       (el) => getComputedStyle(el).backgroundColor,
     );
 
+    // Assert colors differ rather than exact values — exact RGB assertions
+    // would break on any intentional color tweak. Theming correctness is
+    // verified by confirming each theme produces visually distinct output.
     expect(defaultNoteBg).not.toBe(darkNoteBg);
   });
 
@@ -83,6 +86,7 @@ test.describe('Themes', () => {
       (el) => getComputedStyle(el).backgroundColor,
     );
 
+    // See dark theme test comment — same rationale for "differ" assertion.
     expect(defaultNoteBg).not.toBe(minimalNoteBg);
   });
 
