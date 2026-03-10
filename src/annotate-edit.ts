@@ -73,7 +73,9 @@ export class AnnotateEdit {
 
     this.area.appendChild(this.form);
 
-    // Position the form centered under the area, clamped to viewport
+    // Position the form centered under the area, clamped to viewport.
+    // Called before buttons are appended, but form width is dominated by
+    // the textarea and CSS min-width (250px). Recalculated on drag/resize stop.
     this.positionForm();
     this.textarea.focus();
 
