@@ -109,7 +109,9 @@ export class AnnotateView {
 
   /** Show the tooltip and apply hover styling. */
   show(): void {
-    // Position tooltip: render hidden, measure, compute left, then show
+    // Position tooltip horizontally only — vertical position is CSS-driven
+    // (top: calc(100% + 7px)). Vertical clamping (flipping above the area
+    // when near viewport bottom) is not implemented.
     this.tooltip.style.visibility = 'hidden';
     this.tooltip.style.display = 'block';
 
