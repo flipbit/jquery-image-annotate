@@ -325,6 +325,8 @@ annotate(document.getElementById('myImage'), {
 
 Multiple instances on the same page can use different themes.
 
+Button icons (save, delete, cancel) use CSS `mask-image`, so their color automatically follows `--image-annotate-button-text`. Dark themes just need to set the text color — no icon overrides required.
+
 ### Available CSS variables
 
 Set on `.image-annotate-canvas`:
@@ -355,7 +357,7 @@ Set on `.image-annotate-canvas`:
 | `--image-annotate-button-bg` | `#fff` | Button background |
 | `--image-annotate-button-bg-hover` | `#eee` | Button hover background |
 | `--image-annotate-button-border` | `#ccc` | Button border |
-| `--image-annotate-button-text` | `#000` | Button text color |
+| `--image-annotate-button-text` | `#000` | Button text and icon color |
 | `--image-annotate-add-bg` | `rgba(0,0,0,0.4)` | Add Note button background |
 | `--image-annotate-add-bg-hover` | `rgba(0,0,0,0.6)` | Add Note button hover background |
 | `--image-annotate-add-border` | `1px solid rgba(255,255,255,0.5)` | Add Note button border |

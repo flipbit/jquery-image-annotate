@@ -116,7 +116,7 @@ Each `api` field accepts either a URL string (shorthand for default fetch) or a 
 
 ### CSS Theming
 
-All visual styling uses CSS custom properties defined on `.image-annotate-canvas`. The `theme` option sets `data-theme="<value>"` on the canvas element, enabling scoped theme CSS via `.image-annotate-canvas[data-theme="dark"] { ... }`. See `README.md` for the full variable reference.
+All visual styling uses CSS custom properties defined on `.image-annotate-canvas`. The `theme` option sets `data-theme="<value>"` on the canvas element, enabling scoped theme CSS via `.image-annotate-canvas[data-theme="dark"] { ... }`. Button icons use CSS `mask-image` so their color automatically follows `--image-annotate-button-text`. See `README.md` for the full variable reference.
 
 ### Annotation Data Shape
 
