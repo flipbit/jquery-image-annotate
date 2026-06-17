@@ -95,9 +95,7 @@ describe('clampNotes — batch clamping', () => {
   });
 
   test('preserves non-geometry properties on notes', () => {
-    const notes = [
-      { top: 500, left: 600, width: 50, height: 50, text: 'hello', id: '99', editable: true },
-    ];
+    const notes = [{ top: 500, left: 600, width: 50, height: 50, text: 'hello', id: '99', editable: true }];
     clampNotes(notes, W, H);
 
     expect(notes[0].text).toBe('hello');

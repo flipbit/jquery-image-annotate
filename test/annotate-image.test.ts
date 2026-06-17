@@ -938,21 +938,17 @@ describe('theme option', () => {
 describe('load() — boundary clamping', () => {
   test('static notes exceeding image bounds are clamped on load', () => {
     // Image is 400x300
-    const notes = [
-      { top: 280, left: 380, width: 50, height: 50, text: 'Overflow', id: '1', editable: false },
-    ];
+    const notes = [{ top: 280, left: 380, width: 50, height: 50, text: 'Overflow', id: '1', editable: false }];
     const inst = createScaledTestImage(400, 300, 400, 300, { notes });
 
-    expect(inst.notes[0].top).toBe(250);  // 300 - 50
+    expect(inst.notes[0].top).toBe(250); // 300 - 50
     expect(inst.notes[0].left).toBe(350); // 400 - 50
     expect(inst.notes[0].width).toBe(50);
     expect(inst.notes[0].height).toBe(50);
   });
 
   test('notes larger than image are clamped to image dimensions', () => {
-    const notes = [
-      { top: 10, left: 10, width: 500, height: 400, text: 'Too big', id: '1', editable: false },
-    ];
+    const notes = [{ top: 10, left: 10, width: 500, height: 400, text: 'Too big', id: '1', editable: false }];
     const inst = createScaledTestImage(400, 300, 400, 300, { notes });
 
     expect(inst.notes[0].width).toBe(400);
@@ -962,9 +958,7 @@ describe('load() — boundary clamping', () => {
   });
 
   test('notes within bounds are not modified', () => {
-    const notes = [
-      { top: 10, left: 20, width: 50, height: 50, text: 'OK', id: '1', editable: false },
-    ];
+    const notes = [{ top: 10, left: 20, width: 50, height: 50, text: 'OK', id: '1', editable: false }];
     const inst = createScaledTestImage(400, 300, 400, 300, { notes });
 
     expect(inst.notes[0].top).toBe(10);
@@ -974,9 +968,7 @@ describe('load() — boundary clamping', () => {
   });
 
   test('API-loaded notes exceeding bounds are clamped', async () => {
-    const notes = [
-      { top: 500, left: 600, width: 50, height: 50, text: 'API overflow', id: '1', editable: true },
-    ];
+    const notes = [{ top: 500, left: 600, width: 50, height: 50, text: 'API overflow', id: '1', editable: true }];
     const loadFn = vi.fn(() => Promise.resolve(notes));
 
     const inst = createScaledTestImage(400, 300, 400, 300, {
@@ -987,7 +979,7 @@ describe('load() — boundary clamping', () => {
       expect(inst.notes.length).toBe(1);
     });
 
-    expect(inst.notes[0].top).toBe(250);  // 300 - 50
+    expect(inst.notes[0].top).toBe(250); // 300 - 50
     expect(inst.notes[0].left).toBe(350); // 400 - 50
   });
 });

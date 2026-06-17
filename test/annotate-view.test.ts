@@ -111,9 +111,29 @@ describe('annotateView — smart tooltip positioning', () => {
     const areaLeft = 100;
     const areaWidth = 80;
     view.tooltip.getBoundingClientRect = () =>
-      ({ width: tooltipWidth, height: 20, top: 0, left: 0, right: tooltipWidth, bottom: 20, x: 0, y: 0, toJSON() {} }) as DOMRect;
+      ({
+        width: tooltipWidth,
+        height: 20,
+        top: 0,
+        left: 0,
+        right: tooltipWidth,
+        bottom: 20,
+        x: 0,
+        y: 0,
+        toJSON() {},
+      }) as DOMRect;
     view.area.getBoundingClientRect = () =>
-      ({ width: areaWidth, height: 60, top: 50, left: areaLeft, right: areaLeft + areaWidth, bottom: 110, x: areaLeft, y: 50, toJSON() {} }) as DOMRect;
+      ({
+        width: areaWidth,
+        height: 60,
+        top: 50,
+        left: areaLeft,
+        right: areaLeft + areaWidth,
+        bottom: 110,
+        x: areaLeft,
+        y: 50,
+        toJSON() {},
+      }) as DOMRect;
 
     view.show();
 

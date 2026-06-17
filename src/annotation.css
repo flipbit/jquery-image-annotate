@@ -108,7 +108,8 @@
 }
 .image-annotate-area {
   background-color: var(--image-annotate-area-bg);
-  border: var(--image-annotate-area-border-width) var(--image-annotate-area-border-style) var(--image-annotate-area-border);
+  border: var(--image-annotate-area-border-width) var(--image-annotate-area-border-style)
+    var(--image-annotate-area-border);
   border-radius: var(--image-annotate-area-radius);
   position: absolute;
 }
@@ -209,7 +210,7 @@
 }
 .image-annotate-edit-form button::before {
   background-color: var(--image-annotate-button-text);
-  content: "";
+  content: '';
   height: 16px;
   left: 3px;
   -webkit-mask-repeat: no-repeat;
