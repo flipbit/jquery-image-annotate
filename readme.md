@@ -1,7 +1,7 @@
 # Annotate Image
 
 <p align="center">
-  <img src="image-annotate-preview.jpg" alt="Annotate Image preview" width="387">
+  <img src="assets/image-annotate-preview.jpg" alt="Annotate Image preview" width="387">
 </p>
 
 A JavaScript image annotation plugin that creates Flickr-like comment annotations on images. Users can draw rectangular regions on images, add text notes, and persist annotations via callbacks or AJAX.
