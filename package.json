@@ -69,7 +69,7 @@
     "demo:serve:ci": "browser-sync start --server --port 8080 --no-open --files 'dist/**/*' 'demo/**/*'"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -80,7 +80,7 @@
     "browser-sync": "^3.0.4",
     "concurrently": "^10.0.3",
     "esbuild": "^0.28.1",
-    "eslint": "^9.39.4",
+    "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-vue": "^10.8.0",
