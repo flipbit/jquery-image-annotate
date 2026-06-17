@@ -2,7 +2,7 @@ import { AnnotateImage } from './annotate-image';
 import { DEFAULT_LABELS } from './types';
 import type { AnnotateImageOptions } from './types';
 
-declare const $: JQueryStatic;
+declare const $: typeof import('jquery');
 
 declare global {
   interface JQuery {

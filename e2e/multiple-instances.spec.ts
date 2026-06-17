@@ -13,16 +13,16 @@ test.describe('Multiple Instances', () => {
     await expect(canvases).toHaveCount(3);
   });
 
-  test('editable image has 2 annotations', async ({ page }) => {
+  test('editable image has 4 annotations', async ({ page }) => {
     const editableCanvas = page.locator('.image-annotate-canvas').first();
     const areas = editableCanvas.locator('.image-annotate-area');
-    await expect(areas).toHaveCount(2);
+    await expect(areas).toHaveCount(4);
   });
 
-  test('read-only image has 2 annotations', async ({ page }) => {
+  test('read-only image has 4 annotations', async ({ page }) => {
     const readonlyCanvas = page.locator('.image-annotate-canvas').nth(1);
     const areas = readonlyCanvas.locator('.image-annotate-area');
-    await expect(areas).toHaveCount(2);
+    await expect(areas).toHaveCount(4);
   });
 
   test('empty image has 0 annotations', async ({ page }) => {

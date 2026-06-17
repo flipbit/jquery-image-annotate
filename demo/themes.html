@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Themes — Image Annotate</title>
+  <link rel="stylesheet" href="../dist/css/annotate.min.css">
+  <link rel="stylesheet" href="demo.css">
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../dist/jquery.min.js"></script>
+  <style>
+    .demo-code {
+      background: #1e1e2e;
+      border-radius: 4px;
+      padding: 16px;
+      margin-top: 16px;
+      overflow-x: auto;
+    }
+    .demo-code code {
+      color: #cdd6f4;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre;
+    }
+
+    /* ---- Dark theme ---- */
+    .image-annotate-canvas[data-theme="dark"] {
+      --image-annotate-canvas-border: 1px solid #333;
+      --image-annotate-area-border: rgba(255, 255, 255, 0.7);
+      --image-annotate-area-inner-border: rgba(255, 255, 255, 0.3);
+      --image-annotate-area-bg: rgba(100, 149, 237, 0.15);
+      --image-annotate-area-radius: 3px;
+      --image-annotate-hover-color: #6ea8fe;
+      --image-annotate-hover-editable-color: #6ea8fe;
+      --image-annotate-hover-bg: rgba(100, 149, 237, 0.25);
+      --image-annotate-note-bg: #2a2a3e;
+      --image-annotate-note-border: #4a4a6a;
+      --image-annotate-note-text: #e0e0f0;
+      --image-annotate-note-radius: 4px;
+      --image-annotate-note-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      --image-annotate-edit-bg: #1e1e2e;
+      --image-annotate-edit-border: #4a4a6a;
+      --image-annotate-edit-radius: 6px;
+      --image-annotate-edit-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      --image-annotate-note-max-width: 350px;
+      --image-annotate-edit-max-width: 350px;
+      --image-annotate-button-bg: #2a2a3e;
+      --image-annotate-button-bg-hover: #3a3a5e;
+      --image-annotate-button-border: #4a4a6a;
+      --image-annotate-button-text: #e0e0f0;
+    }
+
+    /* ---- Minimal theme ---- */
+    .image-annotate-canvas[data-theme="minimal"] {
+      --image-annotate-area-border: rgba(255, 255, 255, 0.5);
+      --image-annotate-area-inner-border: rgba(255, 255, 255, 0.2);
+      --image-annotate-area-border-width: 1.5px;
+      --image-annotate-hover-color: rgba(255, 255, 255, 0.9);
+      --image-annotate-hover-editable-color: rgba(255, 255, 255, 0.9);
+      --image-annotate-hover-bg: rgba(255, 255, 255, 0.08);
+      --image-annotate-note-bg: rgba(255, 255, 255, 0.95);
+      --image-annotate-note-border: transparent;
+      --image-annotate-note-text: #222;
+      --image-annotate-note-radius: 2px;
+      --image-annotate-note-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      --image-annotate-edit-bg: #fff;
+      --image-annotate-edit-border: transparent;
+      --image-annotate-edit-radius: 4px;
+      --image-annotate-edit-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      --image-annotate-note-max-width: 280px;
+      --image-annotate-edit-max-width: 280px;
+      --image-annotate-button-bg: #f8f8f8;
+      --image-annotate-button-bg-hover: #eee;
+      --image-annotate-button-border: #ddd;
+      --image-annotate-button-text: #333;
+    }
+  </style>
+</head>
+<body>
+  <nav class="demo-nav">
+    <span class="nav-title">Image Annotate</span>
+    <a href="index.html">Home</a>
+    <a href="jquery-basics.html">jQuery Basics</a>
+    <a href="vanilla-basics.html">Vanilla JS</a>
+    <a href="react.html">React</a>
+    <a href="vue.html">Vue</a>
+    <a href="ajax.html">AJAX</a>
+    <a href="multiple-instances.html">Multiple Instances</a>
+    <a href="programmatic-api.html">Programmatic API</a>
+    <a href="custom-labels.html">Custom Labels</a>
+    <a href="scaling.html">Scaling</a>
+    <a href="themes.html" class="active">Themes</a>
+  </nav>
+  <div class="demo-content">
+    <h1>Themes</h1>
+    <p>Style annotations using CSS custom properties. Set <code>theme: 'name'</code> in options to add a <code>data-theme</code> attribute, then target it in CSS to override variables. Multiple themes can coexist on the same page.</p>
+
+    <div class="demo-section">
+      <h2>Default</h2>
+      <p>No <code>theme</code> option — uses the built-in variable defaults.</p>
+      <img id="theme-default" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+    </div>
+
+    <div class="demo-section">
+      <h2>Dark</h2>
+      <p><code>theme: 'dark'</code> — dark tooltips, blue-tinted annotation areas, rounded corners, shadows.</p>
+      <img id="theme-dark" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+      <pre class="demo-code"><code>.image-annotate-canvas[data-theme="dark"] {
+  --image-annotate-canvas-border: 1px solid #333;
+  --image-annotate-area-border: rgba(255, 255, 255, 0.7);
+  --image-annotate-area-inner-border: rgba(255, 255, 255, 0.3);
+  --image-annotate-area-bg: rgba(100, 149, 237, 0.15);
+  --image-annotate-area-radius: 3px;
+  --image-annotate-hover-color: #6ea8fe;
+  --image-annotate-hover-editable-color: #6ea8fe;
+  --image-annotate-hover-bg: rgba(100, 149, 237, 0.25);
+  --image-annotate-note-bg: #2a2a3e;
+  --image-annotate-note-border: #4a4a6a;
+  --image-annotate-note-text: #e0e0f0;
+  --image-annotate-note-radius: 4px;
+  --image-annotate-note-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --image-annotate-edit-bg: #1e1e2e;
+  --image-annotate-edit-border: #4a4a6a;
+  --image-annotate-edit-radius: 6px;
+  --image-annotate-edit-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --image-annotate-note-max-width: 350px;
+  --image-annotate-edit-max-width: 350px;
+  --image-annotate-button-bg: #2a2a3e;
+  --image-annotate-button-bg-hover: #3a3a5e;
+  --image-annotate-button-border: #4a4a6a;
+  --image-annotate-button-text: #e0e0f0;
+}</code></pre>
+    </div>
+
+    <div class="demo-section">
+      <h2>Minimal</h2>
+      <p><code>theme: 'minimal'</code> — clean white tooltips, thin borders, no canvas border, soft shadows.</p>
+      <img id="theme-minimal" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760">
+      <pre class="demo-code"><code>.image-annotate-canvas[data-theme="minimal"] {
+  --image-annotate-area-border: rgba(255, 255, 255, 0.5);
+  --image-annotate-area-inner-border: rgba(255, 255, 255, 0.2);
+  --image-annotate-area-border-width: 1.5px;
+  --image-annotate-hover-color: rgba(255, 255, 255, 0.9);
+  --image-annotate-hover-editable-color: rgba(255, 255, 255, 0.9);
+  --image-annotate-hover-bg: rgba(255, 255, 255, 0.08);
+  --image-annotate-note-bg: rgba(255, 255, 255, 0.95);
+  --image-annotate-note-border: transparent;
+  --image-annotate-note-text: #222;
+  --image-annotate-note-radius: 2px;
+  --image-annotate-note-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  --image-annotate-edit-bg: #fff;
+  --image-annotate-edit-border: transparent;
+  --image-annotate-edit-radius: 4px;
+  --image-annotate-edit-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  --image-annotate-note-max-width: 280px;
+  --image-annotate-edit-max-width: 280px;
+  --image-annotate-button-bg: #f8f8f8;
+  --image-annotate-button-bg-hover: #eee;
+  --image-annotate-button-border: #ddd;
+  --image-annotate-button-text: #333;
+}</code></pre>
+    </div>
+  </div>
+
+  <script>
+    var notes = [
+      { top: 28, left: 117, width: 164, height: 553, text: "Cypress tree", id: "note-1", editable: true },
+      { top: 109, left: 338, width: 274, height: 266, text: "Swirl in the sky", id: "note-2", editable: false },
+      { top: 528, left: 349, width: 589, height: 207, text: "Village below", id: "note-3", editable: true },
+      { top: 47, left: 779, width: 167, height: 171, text: "Crescent Moon", id: "note-4", editable: false }
+    ];
+
+    $(window).on('load', function() {
+      $('#theme-default').annotateImage({
+        editable: true,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+      $('#theme-dark').annotateImage({
+        editable: true,
+        theme: 'dark',
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+      $('#theme-minimal').annotateImage({
+        editable: true,
+        theme: 'minimal',
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+    });
+  </script>
+</body>
+</html>

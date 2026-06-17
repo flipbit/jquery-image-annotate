@@ -1,6 +1,6 @@
 {
   "name": "annotate-image",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0-beta.3",
   "description": "Create Flickr-like comment annotations on images — draw rectangles, add notes, save via AJAX or static data",
   "license": "GPL-2.0",
   "repository": {
@@ -64,35 +64,35 @@
     "demo:watch:react": "esbuild src/react.tsx --bundle --format=esm --external:react --external:react-dom --outfile=dist/react.js --watch",
     "demo:watch:vue": "esbuild src/vue.ts --bundle --format=esm --external:vue --outfile=dist/vue.js --watch",
     "demo:watch:css": "esbuild src/annotation.css --minify --outfile=dist/css/annotate.min.css --watch",
-    "demo:serve": "live-server --port=8080 --open=demo/index.html --watch=dist,demo",
+    "demo:serve": "browser-sync start --server --port 8080 --startPath demo/index.html --files 'dist/**/*' 'demo/**/*'",
     "demo:ci": "npm run build && concurrently -k \"npm:demo:watch:*\" \"npm:demo:serve:ci\"",
-    "demo:serve:ci": "live-server --port=8080 --no-browser --watch=dist,demo"
+    "demo:serve:ci": "browser-sync start --server --port 8080 --no-open --files 'dist/**/*' 'demo/**/*'"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
-    "@types/jquery": "^3.5.33",
+    "@types/jquery": "^3.5.34",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@vue/test-utils": "^2.4.6",
+    "browser-sync": "^3.0.4",
     "concurrently": "^9.2.1",
     "esbuild": "^0.28.1",
-    "eslint": "^9.39.2",
+    "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-vue": "^10.8.0",
     "jquery": "^3.7.1",
-    "jsdom": "^28.0.0",
-    "live-server": "^1.2.2",
+    "jsdom": "^28.1.0",
     "prettier": "^3.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0",
-    "vitest": "^4.0.18",
-    "vue": "^3.5.28"
+    "typescript-eslint": "^8.57.0",
+    "vitest": "^4.1.0",
+    "vue": "^3.5.30"
   },
   "peerDependencies": {
     "jquery": ">=3.7.0",

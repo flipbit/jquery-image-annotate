@@ -11,6 +11,7 @@ import type {
 import { AnnotateView } from './annotate-view';
 import { AnnotateEdit } from './annotate-edit';
 import { createDefaultHandlers } from './interactions';
+import { clampNotes } from './positioning';
 
 /** Strip internal fields (view, editable) before passing to callbacks. */
 export function stripInternals(note: AnnotationNote): NoteData {
@@ -146,6 +147,9 @@ export class AnnotateImage {
     // Build canvas structure — wrap the image
     this.canvas = document.createElement('div');
     this.canvas.className = 'image-annotate-canvas';
+    if (options.theme) {
+      this.canvas.dataset.theme = options.theme;
+    }
 
     this.viewOverlay = document.createElement('div');
     this.viewOverlay.className = 'image-annotate-view';
@@ -253,6 +257,7 @@ export class AnnotateImage {
   /** Rebuild annotation views from the current notes array. */
   load(): void {
     this.destroyViews();
+    clampNotes(this.notes, this.naturalWidth, this.naturalHeight);
     this.createViews();
     this.notifyLoad();
   }
@@ -395,6 +400,7 @@ export class AnnotateImage {
       .then((notes) => {
         this.destroyViews();
         this.notes = notes;
+        clampNotes(this.notes, this.naturalWidth, this.naturalHeight);
         this.createViews();
         this.notifyLoad();
       })

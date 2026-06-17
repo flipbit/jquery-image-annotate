@@ -1,6 +1,7 @@
 import type { AnnotationNote } from './types';
 import type { AnnotateImage } from './annotate-image';
 import { AnnotateEdit } from './annotate-edit';
+import { computeNoteLeft } from './positioning';
 
 /** Read position from inline styles (jsdom has no layout engine). */
 export function readInlinePosition(el: HTMLElement) {
@@ -108,7 +109,19 @@ export class AnnotateView {
 
   /** Show the tooltip and apply hover styling. */
   show(): void {
+    // Position tooltip horizontally only — vertical position is CSS-driven
+    // (top: calc(100% + 7px)). Vertical clamping (flipping above the area
+    // when near viewport bottom) is not implemented.
+    this.tooltip.style.visibility = 'hidden';
     this.tooltip.style.display = 'block';
+
+    const noteRect = this.tooltip.getBoundingClientRect();
+    const areaRect = this.area.getBoundingClientRect();
+    const left = computeNoteLeft(noteRect.width, areaRect.left, areaRect.width, window.innerWidth);
+    this.tooltip.style.left = left + 'px';
+
+    this.tooltip.style.visibility = '';
+
     if (!this.editable) {
       this.area.classList.add('image-annotate-area-hover');
     } else {

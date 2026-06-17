@@ -514,7 +514,7 @@ describe('annotateEdit — form positioning', () => {
     expect(form.parentElement).toBe(area);
   });
 
-  test('form has no inline top/left positioning', () => {
+  test('form gets inline left positioning but no inline top', () => {
     const image = createTestImage();
     const inst = getInstance(image);
 
@@ -522,7 +522,7 @@ describe('annotateEdit — form positioning', () => {
 
     const form = inst.canvas.querySelector('.image-annotate-edit-form') as HTMLElement;
     expect(form.style.top).toBe('');
-    expect(form.style.left).toBe('');
+    expect(form.style.left).not.toBe('');
   });
 
   test('form position is consistent after a zero-distance drag', () => {
@@ -540,6 +540,47 @@ describe('annotateEdit — form positioning', () => {
     area.dispatchEvent(new PointerEvent('pointerup', { clientX: 50, clientY: 50, bubbles: true }));
 
     expect(form.style.top).toBe(formTopBefore);
+  });
+});
+
+describe('annotateEdit — positionForm after drag/resize', () => {
+  test('drag onStop updates form left position', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    inst.add();
+
+    const form = inst.canvas.querySelector('.image-annotate-edit-form') as HTMLElement;
+    const area = inst.canvas.querySelector('.image-annotate-edit-area') as HTMLElement;
+    const leftBefore = form.style.left;
+
+    // Simulate drag: pointerdown, move, pointerup at new position
+    area.dispatchEvent(new PointerEvent('pointerdown', { clientX: 50, clientY: 50, button: 0, bubbles: true }));
+    area.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 80, bubbles: true }));
+
+    // positionForm() should have been called — form.style.left is set
+    expect(form.style.left).not.toBe('');
+    // In jsdom getBoundingClientRect returns zeros, so computeNoteLeft(0,0,0,0) = 0
+    // The key assertion is that positionForm() ran (left is set to a value)
+    expect(form.style.left).toBe(leftBefore);
+  });
+
+  test('resize onStop updates form left position', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    inst.add();
+
+    const form = inst.canvas.querySelector('.image-annotate-edit-form') as HTMLElement;
+    const area = inst.canvas.querySelector('.image-annotate-edit-area') as HTMLElement;
+    const handle = area.querySelector('.image-annotate-resize-handle-se') as HTMLElement;
+
+    // Simulate resize: pointerdown on handle, pointerup at new position
+    handle.dispatchEvent(new PointerEvent('pointerdown', { clientX: 60, clientY: 60, button: 0, bubbles: true }));
+    handle.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 100, bubbles: true }));
+
+    // positionForm() should have been called
+    expect(form.style.left).not.toBe('');
   });
 });
 

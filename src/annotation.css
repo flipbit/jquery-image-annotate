@@ -1,13 +1,13 @@
 .image-annotate-add {
   --image-annotate-icon-add: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23fff'%3E%3Cpath d='M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z'/%3E%3C/svg%3E");
   appearance: none;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--image-annotate-add-bg);
   background-image: var(--image-annotate-icon-add);
   background-repeat: no-repeat;
   background-position: center;
   background-size: 20px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
+  border: var(--image-annotate-add-border);
+  border-radius: var(--image-annotate-add-radius);
   bottom: 8px;
   color: #fff;
   cursor: pointer;
@@ -23,7 +23,7 @@
   z-index: 1;
 }
 .image-annotate-add:hover {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--image-annotate-add-bg-hover);
 }
 .image-annotate-add:focus {
   opacity: 1;
@@ -46,10 +46,28 @@
   --image-annotate-button-bg-hover: #eee;
   --image-annotate-button-border: #ccc;
   --image-annotate-button-text: #000;
-  --image-annotate-icon-save: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23333'%3E%3Cpath d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
-  --image-annotate-icon-cancel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23333'%3E%3Cpath d='M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z'/%3E%3C/svg%3E");
-  --image-annotate-icon-delete: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23333'%3E%3Cpath d='M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z'/%3E%3C/svg%3E");
-  border: solid 1px var(--image-annotate-button-border);
+  /* Icon SVGs use an opaque fill for the mask shape. The fill color is
+     irrelevant — visible icon color comes from background-color via mask-image. */
+  --image-annotate-icon-save: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23fff'%3E%3Cpath d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+  --image-annotate-icon-cancel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23fff'%3E%3Cpath d='M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z'/%3E%3C/svg%3E");
+  --image-annotate-icon-delete: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%23fff'%3E%3Cpath d='M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z'/%3E%3C/svg%3E");
+  --image-annotate-canvas-border: none;
+  --image-annotate-area-bg: transparent;
+  --image-annotate-area-border-width: 1px;
+  --image-annotate-area-border-style: solid;
+  --image-annotate-area-radius: 0;
+  --image-annotate-hover-bg: transparent;
+  --image-annotate-note-radius: 0;
+  --image-annotate-note-shadow: none;
+  --image-annotate-edit-radius: 0;
+  --image-annotate-edit-shadow: none;
+  --image-annotate-note-max-width: 300px;
+  --image-annotate-edit-max-width: 300px;
+  --image-annotate-add-bg: rgba(0, 0, 0, 0.4);
+  --image-annotate-add-bg-hover: rgba(0, 0, 0, 0.6);
+  --image-annotate-add-border: 1px solid rgba(255, 255, 255, 0.5);
+  --image-annotate-add-radius: 4px;
+  border: var(--image-annotate-canvas-border);
   display: inline-block;
   margin: 0;
   max-width: 100%;
@@ -89,19 +107,30 @@
   display: none;
 }
 .image-annotate-area {
-  border: 1px solid var(--image-annotate-area-border);
+  background-color: var(--image-annotate-area-bg);
+  border: var(--image-annotate-area-border-width) var(--image-annotate-area-border-style)
+    var(--image-annotate-area-border);
+  border-radius: var(--image-annotate-area-radius);
   position: absolute;
 }
 .image-annotate-area div {
   border: 1px solid var(--image-annotate-area-inner-border);
+  border-radius: var(--image-annotate-area-radius);
   box-sizing: border-box;
   display: block;
 }
 .image-annotate-area-hover div {
   border-color: var(--image-annotate-hover-color);
 }
+.image-annotate-area-hover {
+  background-color: var(--image-annotate-hover-bg);
+  z-index: 1;
+}
 .image-annotate-area-editable {
   cursor: pointer;
+}
+.image-annotate-area-editable-hover {
+  z-index: 1;
 }
 .image-annotate-area-editable-hover div {
   border-color: var(--image-annotate-hover-editable-color);
@@ -109,15 +138,18 @@
 .image-annotate-note {
   background-color: var(--image-annotate-note-bg);
   border: solid 1px var(--image-annotate-note-border);
+  border-radius: var(--image-annotate-note-radius);
+  box-shadow: var(--image-annotate-note-shadow);
   color: var(--image-annotate-note-text);
   display: none;
   font-family: var(--image-annotate-font-family);
   font-size: var(--image-annotate-font-size);
-  left: -1px;
-  max-width: 200px;
+  left: 0;
+  max-width: var(--image-annotate-note-max-width);
   padding: 3px 7px;
   position: absolute;
   top: calc(100% + 7px);
+  width: max-content;
 }
 .image-annotate-note .actions {
   display: block;
@@ -131,12 +163,15 @@
 .image-annotate-edit-form {
   background-color: var(--image-annotate-edit-bg);
   border: 1px solid var(--image-annotate-edit-border);
+  border-radius: var(--image-annotate-edit-radius);
+  box-shadow: var(--image-annotate-edit-shadow);
   box-sizing: border-box;
   cursor: default;
   display: flex;
   flex-direction: column;
   gap: 7px;
-  left: -1px;
+  left: 0;
+  max-width: var(--image-annotate-edit-max-width);
   min-width: 250px;
   padding: 7px;
   position: absolute;
@@ -162,9 +197,6 @@
 .image-annotate-edit-form button {
   appearance: none;
   background-color: var(--image-annotate-button-bg);
-  background-repeat: no-repeat;
-  background-position: 3px center;
-  background-size: 16px 16px;
   border: solid 1px var(--image-annotate-button-border);
   color: var(--image-annotate-button-text);
   cursor: pointer;
@@ -173,12 +205,30 @@
   line-height: 18px;
   min-height: 22px;
   padding: 2px 6px 2px 24px;
+  position: relative;
   white-space: nowrap;
 }
+.image-annotate-edit-form button::before {
+  background-color: var(--image-annotate-button-text);
+  content: '';
+  height: 16px;
+  left: 3px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 16px 16px;
+  mask-size: 16px 16px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+}
 .image-annotate-edit-form button:empty {
-  background-position: center;
   min-width: 24px;
   padding: 2px 4px;
+}
+.image-annotate-edit-form button:empty::before {
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .image-annotate-edit-form button:hover {
   background-color: var(--image-annotate-button-bg-hover);
@@ -223,14 +273,17 @@
   right: -4px;
   bottom: -4px;
 }
-.image-annotate-edit-ok {
-  background-image: var(--image-annotate-icon-save);
+.image-annotate-edit-ok::before {
+  -webkit-mask-image: var(--image-annotate-icon-save);
+  mask-image: var(--image-annotate-icon-save);
 }
-.image-annotate-edit-delete {
-  background-image: var(--image-annotate-icon-delete);
+.image-annotate-edit-delete::before {
+  -webkit-mask-image: var(--image-annotate-icon-delete);
+  mask-image: var(--image-annotate-icon-delete);
 }
-.image-annotate-edit-close {
-  background-image: var(--image-annotate-icon-cancel);
+.image-annotate-edit-close::before {
+  -webkit-mask-image: var(--image-annotate-icon-cancel);
+  mask-image: var(--image-annotate-icon-cancel);
 }
 .image-annotate-area-editable:focus {
   outline: 2px solid var(--image-annotate-hover-editable-color);

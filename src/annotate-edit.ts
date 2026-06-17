@@ -2,6 +2,7 @@ import type { AnnotationNote, InteractionHandlers } from './types';
 import type { AnnotateImage } from './annotate-image';
 import { stripInternals } from './annotate-image';
 import { AnnotateView, readInlinePosition, readInlineSize } from './annotate-view';
+import { computeNoteLeft } from './positioning';
 
 const DEFAULT_NOTE_TOP = 30;
 const DEFAULT_NOTE_LEFT = 30;
@@ -72,6 +73,12 @@ export class AnnotateEdit {
 
     this.area.appendChild(this.form);
 
+    // Position the form centered under the area, clamped to viewport.
+    // Called before buttons are appended, but form width is dominated by
+    // the textarea and CSS min-width (250px). Recalculated on drag/resize stop.
+    this.positionForm();
+    this.textarea.focus();
+
     // Prevent pointer events on the form from triggering the area's drag handler
     this.form.addEventListener('pointerdown', (e) => e.stopPropagation());
 
@@ -86,7 +93,10 @@ export class AnnotateEdit {
     this.handlers.makeResizable(area, {
       containment: image.canvas,
       onResize: applyRect,
-      onStop: applyRect,
+      onStop: (rect) => {
+        applyRect(rect);
+        this.positionForm();
+      },
     });
     this.handlers.makeDraggable(area, {
       containment: image.canvas,
@@ -97,10 +107,9 @@ export class AnnotateEdit {
       onStop: (pos) => {
         area.style.left = pos.left + 'px';
         area.style.top = pos.top + 'px';
+        this.positionForm();
       },
     });
-
-    this.textarea.focus();
 
     this.form.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -119,6 +128,14 @@ export class AnnotateEdit {
       this.addDeleteButton(buttonRow, existingView);
     }
     this.addCancelButton(buttonRow);
+  }
+
+  /** Recompute the form's horizontal position relative to the area. */
+  private positionForm(): void {
+    const formRect = this.form.getBoundingClientRect();
+    const areaRect = this.area.getBoundingClientRect();
+    const left = computeNoteLeft(formRect.width, areaRect.left, areaRect.width, window.innerWidth);
+    this.form.style.left = left + 'px';
   }
 
   /** Tear down the edit form and interaction handlers. */

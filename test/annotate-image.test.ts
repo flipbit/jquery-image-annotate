@@ -650,10 +650,14 @@ describe('stripInternals', () => {
 describe('auto-scaling — ResizeObserver', () => {
   let observeCallback: ((entries: ResizeObserverEntry[]) => void) | null = null;
   let disconnected = false;
+  let originalResizeObserver: typeof ResizeObserver | undefined;
 
   beforeEach(() => {
     observeCallback = null;
     disconnected = false;
+    originalResizeObserver = (globalThis as Record<string, unknown>).ResizeObserver as
+      | typeof ResizeObserver
+      | undefined;
     vi.stubGlobal(
       'ResizeObserver',
       class {
@@ -669,7 +673,11 @@ describe('auto-scaling — ResizeObserver', () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    if (originalResizeObserver !== undefined) {
+      vi.stubGlobal('ResizeObserver', originalResizeObserver);
+    } else {
+      delete (globalThis as Record<string, unknown>).ResizeObserver;
+    }
   });
 
   test('ResizeObserver is attached by default (autoResize defaults to true)', () => {
@@ -894,5 +902,84 @@ describe('toRendered / toNatural coordinate conversion', () => {
     expect(restored.left).toBeCloseTo(original.left);
     expect(restored.width).toBeCloseTo(original.width);
     expect(restored.height).toBeCloseTo(original.height);
+  });
+});
+
+describe('theme option', () => {
+  test('sets data-theme attribute on canvas when theme is provided', () => {
+    const image = createTestImage({ theme: 'dark' });
+    const inst = getInstance(image);
+
+    expect(inst.canvas.getAttribute('data-theme')).toBe('dark');
+  });
+
+  test('does not set data-theme attribute when theme is omitted', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    expect(inst.canvas.hasAttribute('data-theme')).toBe(false);
+  });
+
+  test('does not set data-theme attribute when theme is empty string', () => {
+    const image = createTestImage({ theme: '' });
+    const inst = getInstance(image);
+
+    expect(inst.canvas.hasAttribute('data-theme')).toBe(false);
+  });
+
+  test('sets data-theme with custom theme name', () => {
+    const image = createTestImage({ theme: 'my-custom-theme' });
+    const inst = getInstance(image);
+
+    expect(inst.canvas.getAttribute('data-theme')).toBe('my-custom-theme');
+  });
+});
+
+describe('load() — boundary clamping', () => {
+  test('static notes exceeding image bounds are clamped on load', () => {
+    // Image is 400x300
+    const notes = [{ top: 280, left: 380, width: 50, height: 50, text: 'Overflow', id: '1', editable: false }];
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes });
+
+    expect(inst.notes[0].top).toBe(250); // 300 - 50
+    expect(inst.notes[0].left).toBe(350); // 400 - 50
+    expect(inst.notes[0].width).toBe(50);
+    expect(inst.notes[0].height).toBe(50);
+  });
+
+  test('notes larger than image are clamped to image dimensions', () => {
+    const notes = [{ top: 10, left: 10, width: 500, height: 400, text: 'Too big', id: '1', editable: false }];
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes });
+
+    expect(inst.notes[0].width).toBe(400);
+    expect(inst.notes[0].height).toBe(300);
+    expect(inst.notes[0].left).toBe(0);
+    expect(inst.notes[0].top).toBe(0);
+  });
+
+  test('notes within bounds are not modified', () => {
+    const notes = [{ top: 10, left: 20, width: 50, height: 50, text: 'OK', id: '1', editable: false }];
+    const inst = createScaledTestImage(400, 300, 400, 300, { notes });
+
+    expect(inst.notes[0].top).toBe(10);
+    expect(inst.notes[0].left).toBe(20);
+    expect(inst.notes[0].width).toBe(50);
+    expect(inst.notes[0].height).toBe(50);
+  });
+
+  test('API-loaded notes exceeding bounds are clamped', async () => {
+    const notes = [{ top: 500, left: 600, width: 50, height: 50, text: 'API overflow', id: '1', editable: true }];
+    const loadFn = vi.fn(() => Promise.resolve(notes));
+
+    const inst = createScaledTestImage(400, 300, 400, 300, {
+      api: { load: loadFn },
+    });
+
+    await vi.waitFor(() => {
+      expect(inst.notes.length).toBe(1);
+    });
+
+    expect(inst.notes[0].top).toBe(250); // 300 - 50
+    expect(inst.notes[0].left).toBe(350); // 400 - 50
   });
 });

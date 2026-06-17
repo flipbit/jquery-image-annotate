@@ -104,15 +104,13 @@ function computeResize(
   dx: number,
   dy: number,
 ): { left: number; top: number; width: number; height: number } {
-  let left = startLeft,
-    top = startTop,
-    width = startWidth,
-    height = startHeight;
+  let left: number, top: number, width: number, height: number;
 
   if (corner === 'nw' || corner === 'sw') {
     left = startLeft + dx;
     width = startWidth - dx;
   } else {
+    left = startLeft;
     width = startWidth + dx;
   }
 
@@ -120,6 +118,7 @@ function computeResize(
     top = startTop + dy;
     height = startHeight - dy;
   } else {
+    top = startTop;
     height = startHeight + dy;
   }
 

@@ -16,8 +16,8 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run demo:ci',
-    url: 'http://localhost:8080',
+    url: 'http://127.0.0.1:8080/demo/index.html',
     reuseExistingServer: true,
-    timeout: 30_000,
+    timeout: 60_000,
   },
 });

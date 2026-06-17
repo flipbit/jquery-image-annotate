@@ -2,6 +2,7 @@ import { describe, test, expect } from 'vitest';
 import '../src/jquery.annotate.ts';
 import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
 import { AnnotateView } from '../src/annotate-view.ts';
+import { computeNoteLeft } from '../src/positioning.ts';
 import type { AnnotationNote } from '../src/types.ts';
 
 function createImageWithNote(noteOverrides: Partial<AnnotationNote> = {}) {
@@ -63,9 +64,10 @@ describe('annotateView — positioning', () => {
     expect(innerDiv.style.width).toBe('80px');
   });
 
-  test('tooltip has no inline positioning (CSS handles it)', () => {
+  test('tooltip has no inline positioning at construction (set on show)', () => {
     const { view } = createImageWithNote({ top: 50, left: 100, height: 60 });
 
+    // Before show() is called, no inline left/top
     expect(view.tooltip.style.top).toBe('');
     expect(view.tooltip.style.left).toBe('');
   });
@@ -97,6 +99,56 @@ describe('annotateView — tooltip positioning', () => {
     const { view } = createImageWithNote();
 
     expect(view.tooltip.parentElement).toBe(view.area);
+  });
+});
+
+describe('annotateView — smart tooltip positioning', () => {
+  test('show() computes tooltip left from getBoundingClientRect measurements', () => {
+    const { view } = createImageWithNote();
+
+    // Stub getBoundingClientRect with known non-zero values
+    const tooltipWidth = 150;
+    const areaLeft = 100;
+    const areaWidth = 80;
+    view.tooltip.getBoundingClientRect = () =>
+      ({
+        width: tooltipWidth,
+        height: 20,
+        top: 0,
+        left: 0,
+        right: tooltipWidth,
+        bottom: 20,
+        x: 0,
+        y: 0,
+        toJSON() {},
+      }) as DOMRect;
+    view.area.getBoundingClientRect = () =>
+      ({
+        width: areaWidth,
+        height: 60,
+        top: 50,
+        left: areaLeft,
+        right: areaLeft + areaWidth,
+        bottom: 110,
+        x: areaLeft,
+        y: 50,
+        toJSON() {},
+      }) as DOMRect;
+
+    view.show();
+
+    const expectedLeft = computeNoteLeft(tooltipWidth, areaLeft, areaWidth, window.innerWidth);
+    expect(view.tooltip.style.left).toBe(expectedLeft + 'px');
+  });
+
+  test('hide() does not clear inline left (left persists for next show)', () => {
+    const { view } = createImageWithNote();
+
+    view.show();
+    view.hide();
+
+    // Left style remains set from the last show()
+    expect(view.tooltip.style.left).not.toBe('');
   });
 });
 

@@ -8,7 +8,7 @@ test.describe('Programmatic API', () => {
 
   test('plugin initializes with 3 annotations', async ({ page }) => {
     const areas = page.locator('.image-annotate-area');
-    await expect(areas).toHaveCount(3);
+    await expect(areas).toHaveCount(4);
   });
 
   test('Clear All removes all annotations', async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe('Programmatic API', () => {
 
     await page.click('#btn-reload');
     const areas = page.locator('.image-annotate-area');
-    await expect(areas).toHaveCount(3);
+    await expect(areas).toHaveCount(4);
   });
 
   test('Destroy removes the canvas and restores image', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('Programmatic API', () => {
     await expect(canvas).toBeVisible();
 
     const areas = page.locator('.image-annotate-area');
-    await expect(areas).toHaveCount(3);
+    await expect(areas).toHaveCount(4);
   });
 
   test('status log records operations', async ({ page }) => {

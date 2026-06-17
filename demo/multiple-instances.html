@@ -22,6 +22,7 @@
     <a href="programmatic-api.html">Programmatic API</a>
     <a href="custom-labels.html">Custom Labels</a>
     <a href="scaling.html">Scaling</a>
+    <a href="themes.html">Themes</a>
   </nav>
   <div class="demo-content">
     <h1>Multiple Instances</h1>
@@ -37,7 +38,7 @@
       <div class="demo-section">
         <h2>Read-Only with Notes</h2>
         <p><code>editable: false</code>, different set of annotations.</p>
-        <img id="multi-readonly" src="images/mona-lisa.jpg" alt="Mona Lisa" width="960" height="1431">
+        <img id="multi-readonly" src="images/mona-lisa.jpg" alt="Mona Lisa" width="960" height="1431" style="max-width: 400px; height: auto;">
       </div>
 
       <div class="demo-section">
@@ -53,16 +54,20 @@
       $('#multi-editable').annotateImage({
         editable: true,
         notes: [
-          { top: 80, left: 30, width: 100, height: 350, text: "Cypress tree", id: "me-1", editable: true },
-          { top: 20, left: 200, width: 500, height: 200, text: "Swirling sky", id: "me-2", editable: false }
+          { top: 28, left: 117, width: 164, height: 553, text: "Cypress tree", id: "me-1", editable: true },
+          { top: 109, left: 338, width: 274, height: 266, text: "Swirl in the sky", id: "me-2", editable: false },
+          { top: 528, left: 349, width: 589, height: 207, text: "Village below", id: "me-3", editable: true },
+          { top: 47, left: 779, width: 167, height: 171, text: "Crescent Moon", id: "me-4", editable: false }
         ]
       });
 
       $('#multi-readonly').annotateImage({
         editable: false,
         notes: [
-          { top: 490, left: 350, width: 230, height: 80, text: "The enigmatic smile", id: "mr-1", editable: false },
-          { top: 700, left: 280, width: 350, height: 180, text: "Folded hands", id: "mr-2", editable: false }
+          { top: 422.4, left: 369.6, width: 120, height: 55.2, text: "Her smile appears to change depending on where you look \u2014 da Vinci used sfumato shading with no hard lines around the mouth", id: "mr-1", editable: false },
+          { top: 273.6, left: 326.4, width: 220.8, height: 67.2, text: "No eyebrows or lashes \u2014 either the fashion of Renaissance Florence, or lost over centuries of cleaning and restoration", id: "mr-2", editable: false },
+          { top: 295.2, left: 612, width: 340.8, height: 141.6, text: "The left and right backgrounds don\u2019t align \u2014 the horizon sits at different heights, creating a subtle sense of unease", id: "mr-3", editable: false },
+          { top: 1046.4, left: 168, width: 439.2, height: 249.6, text: "Gently folded hands convey calm and virtue \u2014 a deliberate pose that was a Renaissance convention for portraying respectable women", id: "mr-4", editable: false }
         ]
       });
 

@@ -112,6 +112,9 @@ export interface AnnotateImageOptions {
 
   /** Attach a ResizeObserver to rescale annotations when the image resizes. Default: true. */
   autoResize?: boolean;
+
+  /** CSS theme name. When set, adds `data-theme="<value>"` to the canvas element for CSS variable scoping. */
+  theme?: string;
 }
 
 export interface DragCallbacks {

@@ -47,8 +47,18 @@ src/
   jquery.annotate.ts      - jQuery adapter ($.fn.annotateImage registration + destroy dispatch)
   annotation.css          - Plugin styles (icons are inline SVG data URIs)
 demo/
-  static.html             - Demo with hardcoded annotations
-  ajax.html               - Demo with AJAX endpoints
+  index.html              - Demo index page with links to all demos
+  jquery-basics.html      - jQuery initialization with static notes
+  vanilla-basics.html     - Core API without jQuery
+  react.html              - React 18 component demo
+  vue.html                - Vue 3 component demo
+  ajax.html               - AJAX load/save/delete demo
+  multiple-instances.html - Several instances on one page
+  programmatic-api.html   - Programmatic control (add, clear, destroy, export)
+  custom-labels.html      - Internationalization / icon-only mode
+  scaling.html            - CSS-constrained and responsive images
+  themes.html             - CSS custom property theming
+  demo.css                - Shared demo page styles
   fixtures/               - Mock AJAX endpoint files (get.json, save.json, delete.json)
   images/                 - Demo-only images
 test/                     - Vitest test suite
@@ -97,11 +107,16 @@ Unified defaults (both core and jQuery): `editable: true`, `notes: []`, `autoRes
     placeholder?: string // default: "" (no placeholder)
   },
   autoResize?: boolean,   // Re-scale on container resize (default: true)
+  theme?: string,         // CSS theme name, sets data-theme on canvas (default: undefined)
   onError?: (context: AnnotateErrorContext) => void,
 }
 ```
 
 Each `api` field accepts either a URL string (shorthand for default fetch) or a function (full control). Omitting `api` entirely means static mode — no network calls.
+
+### CSS Theming
+
+All visual styling uses CSS custom properties defined on `.image-annotate-canvas`. The `theme` option sets `data-theme="<value>"` on the canvas element, enabling scoped theme CSS via `.image-annotate-canvas[data-theme="dark"] { ... }`. Button icons use CSS `mask-image` so their color automatically follows `--image-annotate-button-text`. See `README.md` for the full variable reference.
 
 ### Annotation Data Shape
 
