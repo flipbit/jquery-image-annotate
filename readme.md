@@ -1,7 +1,7 @@
 # Annotate Image
 
 <p align="center">
-  <img src="assets/image-annotate-preview.jpg" alt="Annotate Image preview" width="387">
+  <a href="https://pullpatchpush.com/annotate-image"><img src="assets/image-annotate-preview.jpg" alt="Annotate Image preview" width="387"></a>
 </p>
 
 <p align="center">
@@ -15,6 +15,8 @@
 A JavaScript image annotation plugin that creates Flickr-like comment annotations on images. Users can draw rectangular regions on images, add text notes, and persist annotations via callbacks or AJAX.
 
 Works standalone (vanilla JS), or with jQuery, React, or Vue. Framework adapters are tree-shakeable — only the one you import gets bundled.
+
+**[Documentation & Live Demo](https://pullpatchpush.com/annotate-image)**
 
 ## Installation
 
@@ -408,7 +410,7 @@ The plugin supports keyboard navigation:
 
 ## Demos
 
-Run the demo server locally:
+Try the [live examples](https://pullpatchpush.com/annotate-image/examples) online, or run the demo server locally:
 
 ```sh
 npm run demo
