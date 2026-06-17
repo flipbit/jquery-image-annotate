@@ -4,6 +4,14 @@
   <img src="assets/image-annotate-preview.jpg" alt="Annotate Image preview" width="387">
 </p>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/annotate-image"><img src="https://img.shields.io/npm/v/annotate-image" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/annotate-image"><img src="https://img.shields.io/npm/dm/annotate-image" alt="npm downloads"></a>
+  <a href="https://bundlephobia.com/package/annotate-image"><img src="https://img.shields.io/bundlephobia/minzip/annotate-image" alt="bundle size"></a>
+  <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript strict">
+  <a href="https://www.npmjs.com/package/annotate-image"><img src="https://img.shields.io/npm/l/annotate-image" alt="license"></a>
+</p>
+
 A JavaScript image annotation plugin that creates Flickr-like comment annotations on images. Users can draw rectangular regions on images, add text notes, and persist annotations via callbacks or AJAX.
 
 Works standalone (vanilla JS), or with jQuery, React, or Vue. Framework adapters are tree-shakeable — only the one you import gets bundled.
