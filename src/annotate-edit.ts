@@ -91,7 +91,7 @@ export class AnnotateEdit {
       area.style.height = rect.height + 'px';
     };
     this.handlers.makeResizable(area, {
-      containment: image.canvas,
+      containment: image.editOverlay,
       onResize: applyRect,
       onStop: (rect) => {
         applyRect(rect);
@@ -99,7 +99,7 @@ export class AnnotateEdit {
       },
     });
     this.handlers.makeDraggable(area, {
-      containment: image.canvas,
+      containment: image.editOverlay,
       onDrag: (pos) => {
         area.style.left = pos.left + 'px';
         area.style.top = pos.top + 'px';

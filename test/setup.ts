@@ -84,3 +84,57 @@ export function createScaledTestImage(
   document.body.appendChild(img);
   return new AnnotateImage(img, { editable: true, notes: [], ...options });
 }
+
+/**
+ * Creates an image with padding and border, mocking dimensions accordingly.
+ * The getBoundingClientRect returns border-box dimensions (content + padding + border).
+ * getComputedStyle returns the individual padding/border values.
+ */
+export function createPaddedTestImage(
+  naturalW: number,
+  naturalH: number,
+  contentW: number,
+  contentH: number,
+  padding: number,
+  border: number,
+  options: Partial<AnnotateImageOptions> = {},
+): AnnotateImage {
+  document.body.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = 'test.jpg';
+  img.width = naturalW;
+  img.height = naturalH;
+  Object.defineProperty(img, 'naturalWidth', { value: naturalW, configurable: true });
+  Object.defineProperty(img, 'naturalHeight', { value: naturalH, configurable: true });
+
+  // Set individual padding/border properties so getComputedStyle returns them
+  img.style.paddingTop = `${padding}px`;
+  img.style.paddingRight = `${padding}px`;
+  img.style.paddingBottom = `${padding}px`;
+  img.style.paddingLeft = `${padding}px`;
+  img.style.borderTopWidth = `${border}px`;
+  img.style.borderRightWidth = `${border}px`;
+  img.style.borderBottomWidth = `${border}px`;
+  img.style.borderLeftWidth = `${border}px`;
+  img.style.borderStyle = 'solid';
+
+  // getBoundingClientRect returns border-box: content + padding + border
+  const borderBoxW = contentW + padding * 2 + border * 2;
+  const borderBoxH = contentH + padding * 2 + border * 2;
+  img.getBoundingClientRect = () => ({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: borderBoxW,
+    bottom: borderBoxH,
+    width: borderBoxW,
+    height: borderBoxH,
+    toJSON() {
+      return this;
+    },
+  });
+
+  document.body.appendChild(img);
+  return new AnnotateImage(img, { editable: true, notes: [], ...options });
+}

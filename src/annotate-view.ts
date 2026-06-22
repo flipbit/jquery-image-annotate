@@ -49,7 +49,7 @@ export class AnnotateView {
     // Create the tooltip (was called "form" in old code)
     this.tooltip = document.createElement('div');
     this.tooltip.className = 'image-annotate-note';
-    this.tooltip.textContent = note.text;
+    this.tooltip.textContent = note.text.trim() ? note.text : '(no annotation)';
     this.tooltip.style.display = 'none';
     this.area.appendChild(this.tooltip);
 
@@ -86,7 +86,7 @@ export class AnnotateView {
 
   /** Update the view's position, size, and text from the edit area after a save. */
   resetPosition(editable: { area: HTMLElement; note: AnnotationNote }, text: string): void {
-    this.tooltip.textContent = text;
+    this.tooltip.textContent = text.trim() ? text : '(no annotation)';
     this.tooltip.style.display = 'none';
 
     // Position view DOM using the note's natural coordinates (already converted by edit)

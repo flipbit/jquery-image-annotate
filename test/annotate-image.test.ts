@@ -1,6 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
+import { createTestImage, getInstance, createScaledTestImage, createPaddedTestImage } from './setup.ts';
+import { AnnotateImage } from '../src/annotate-image';
 import type { AnnotateView } from '../src/annotate-view';
 
 describe('annotateImage — initialization', () => {
@@ -822,6 +823,52 @@ describe('auto-scaling — ResizeObserver', () => {
     expect(inst.scaleX).toBe(1);
     expect(inst.scaleY).toBe(1);
   });
+
+  test('resize callback subtracts content insets from dimensions', () => {
+    // 400x300 natural, 400x300 content, 10px padding = 420x320 border-box
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0, { notes: [note] });
+    expect(inst.scaleX).toBe(1);
+
+    // ResizeObserver fires with canvas contentRect (= image border-box).
+    // Image shrinks to 200x150 content, so canvas contentRect = 220x170
+    observeCallback!([{ contentRect: { width: 220, height: 170 } }]);
+
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBeCloseTo(0.5, 5);
+  });
+
+  test('deferred rescale subtracts content insets with padding', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0, { notes: [note] });
+    expect(inst.scaleX).toBe(1);
+
+    // Enter edit mode
+    inst.add();
+
+    // Simulate resize — deferred
+    observeCallback!([{ contentRect: { width: 220, height: 170 } }]);
+    expect(inst.scaleX).toBe(1);
+
+    // Mock canvas getBoundingClientRect for flush (canvas = image border-box)
+    inst.canvas.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 220,
+      bottom: 170,
+      width: 220,
+      height: 170,
+      toJSON() {
+        return this;
+      },
+    });
+
+    inst.cancelEdit();
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBeCloseTo(0.5, 5);
+  });
 });
 
 describe('auto-scaling — scale factor computation', () => {
@@ -858,6 +905,128 @@ describe('auto-scaling — scale factor computation', () => {
     const inst = createScaledTestImage(960, 760, 480, 380);
     expect(inst.naturalWidth).toBe(960);
     expect(inst.naturalHeight).toBe(760);
+  });
+});
+
+describe('padding/border — scale factor computation', () => {
+  test('scale factors use content dimensions, not border-box, with padding', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('scale factors use content dimensions, not border-box, with border', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 0, 5);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('scale factors use content dimensions with both padding and border', () => {
+    const inst = createPaddedTestImage(400, 300, 200, 150, 10, 2);
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
+  });
+
+  test('toRendered uses correct scale with padding present', () => {
+    const inst = createPaddedTestImage(400, 300, 200, 150, 10, 2);
+    const result = inst.toRendered({ top: 100, left: 200, width: 80, height: 60 });
+    expect(result).toEqual({ top: 50, left: 100, width: 40, height: 30 });
+  });
+
+  test('zero padding and border behaves like no padding/border', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 0, 0);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('sets content inset CSS vars on canvas when image has padding', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0);
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-top')).toBe('10px');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-right')).toBe('10px');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-bottom')).toBe('10px');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-left')).toBe('10px');
+  });
+
+  test('sets content inset CSS vars on canvas with padding and border', () => {
+    const inst = createPaddedTestImage(400, 300, 200, 150, 10, 2);
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-top')).toBe('12px');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-right')).toBe('12px');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-bottom')).toBe('12px');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-left')).toBe('12px');
+  });
+
+  test('does not set content inset CSS vars when image has no padding/border', () => {
+    const inst = createScaledTestImage(400, 300, 400, 300);
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-top')).toBe('');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-right')).toBe('');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-bottom')).toBe('');
+    expect(inst.canvas.style.getPropertyValue('--image-annotate-content-left')).toBe('');
+  });
+
+  test('handles asymmetric padding correctly', () => {
+    document.body.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = 'test.jpg';
+    img.width = 400;
+    img.height = 300;
+    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
+    img.style.paddingTop = '10px';
+    img.style.paddingRight = '20px';
+    img.style.paddingBottom = '5px';
+    img.style.paddingLeft = '15px';
+    // content 400x300, border-box = 400+35 x 300+15 = 435x315
+    img.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 435,
+      bottom: 315,
+      width: 435,
+      height: 315,
+      toJSON() {
+        return this;
+      },
+    });
+    document.body.appendChild(img);
+    const inst = new AnnotateImage(img, { editable: true, notes: [] });
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+    expect(inst.contentInset).toEqual({ top: 10, right: 20, bottom: 5, left: 15 });
+  });
+
+  test('handles padding with no border (border style unset)', () => {
+    document.body.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = 'test.jpg';
+    img.width = 400;
+    img.height = 300;
+    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
+    img.style.paddingTop = '10px';
+    img.style.paddingRight = '10px';
+    img.style.paddingBottom = '10px';
+    img.style.paddingLeft = '10px';
+    // No border set — borderTopWidth etc. will be empty string in jsdom
+    img.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 420,
+      bottom: 320,
+      width: 420,
+      height: 320,
+      toJSON() {
+        return this;
+      },
+    });
+    document.body.appendChild(img);
+    const inst = new AnnotateImage(img, { editable: true, notes: [] });
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+    expect(inst.contentInset).toEqual({ top: 10, right: 10, bottom: 10, left: 10 });
   });
 });
 

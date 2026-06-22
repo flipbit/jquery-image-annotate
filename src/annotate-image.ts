@@ -91,6 +91,8 @@ export class AnnotateImage {
   scaleX: number;
   /** Current vertical scale factor (rendered / natural). */
   scaleY: number;
+  /** Padding+border insets from the image element (px). Zero when the image has no padding/border. */
+  readonly contentInset: { top: number; right: number; bottom: number; left: number };
 
   /** Convert a rect from natural image coordinates to rendered (scaled) coordinates. */
   toRendered(rect: { top: number; left: number; width: number; height: number }) {
@@ -125,12 +127,18 @@ export class AnnotateImage {
     this.handlers = createDefaultHandlers();
     this.img = img;
 
-    // Read natural and rendered dimensions
+    // Read natural and rendered dimensions, subtracting padding/border to get content area
     this.naturalWidth = img.naturalWidth || img.width;
     this.naturalHeight = img.naturalHeight || img.height;
     const rendered = img.getBoundingClientRect();
-    const renderedWidth = rendered.width || img.width;
-    const renderedHeight = rendered.height || img.height;
+    const styles = getComputedStyle(img);
+    const insetTop = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.borderTopWidth) || 0);
+    const insetRight = (parseFloat(styles.paddingRight) || 0) + (parseFloat(styles.borderRightWidth) || 0);
+    const insetBottom = (parseFloat(styles.paddingBottom) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+    const insetLeft = (parseFloat(styles.paddingLeft) || 0) + (parseFloat(styles.borderLeftWidth) || 0);
+    this.contentInset = { top: insetTop, right: insetRight, bottom: insetBottom, left: insetLeft };
+    const renderedWidth = (rendered.width || img.width) - insetLeft - insetRight;
+    const renderedHeight = (rendered.height || img.height) - insetTop - insetBottom;
 
     if (this.naturalWidth === 0 || this.naturalHeight === 0) {
       throw new Error('image-annotate: image must have non-zero dimensions (is the image loaded?)');
@@ -149,6 +157,14 @@ export class AnnotateImage {
     this.canvas.className = 'image-annotate-canvas';
     if (options.theme) {
       this.canvas.dataset.theme = options.theme;
+    }
+
+    // Set content inset CSS vars for overlay/button positioning (only when non-zero)
+    if (insetTop || insetRight || insetBottom || insetLeft) {
+      this.canvas.style.setProperty('--image-annotate-content-top', `${insetTop}px`);
+      this.canvas.style.setProperty('--image-annotate-content-right', `${insetRight}px`);
+      this.canvas.style.setProperty('--image-annotate-content-bottom', `${insetBottom}px`);
+      this.canvas.style.setProperty('--image-annotate-content-left', `${insetLeft}px`);
     }
 
     this.viewOverlay = document.createElement('div');
@@ -321,7 +337,9 @@ export class AnnotateImage {
       this.pendingRescale = true;
       return;
     }
-    this.applyRescale(renderedWidth, renderedHeight);
+    const contentWidth = renderedWidth - this.contentInset.left - this.contentInset.right;
+    const contentHeight = renderedHeight - this.contentInset.top - this.contentInset.bottom;
+    this.applyRescale(contentWidth, contentHeight);
   }
 
   /** Apply new scale factors and re-render all views. */
@@ -343,8 +361,10 @@ export class AnnotateImage {
     if (!this.pendingRescale) return;
     this.pendingRescale = false;
     const rect = this.canvas.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      this.applyRescale(rect.width, rect.height);
+    const contentWidth = rect.width - this.contentInset.left - this.contentInset.right;
+    const contentHeight = rect.height - this.contentInset.top - this.contentInset.bottom;
+    if (contentWidth > 0 && contentHeight > 0) {
+      this.applyRescale(contentWidth, contentHeight);
     }
   }
 

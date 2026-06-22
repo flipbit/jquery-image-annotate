@@ -46,6 +46,25 @@ describe('annotateView — rendering', () => {
 
     expect(view.tooltip.style.display).toBe('none');
   });
+
+  test('empty text shows placeholder in tooltip', () => {
+    const { view } = createImageWithNote({ text: '' });
+
+    expect(view.tooltip.textContent).toBe('(no annotation)');
+  });
+
+  test('whitespace-only text shows placeholder in tooltip', () => {
+    const { view } = createImageWithNote({ text: '   ' });
+
+    expect(view.tooltip.textContent).toBe('(no annotation)');
+  });
+
+  test('note data keeps empty text for export even when tooltip shows placeholder', () => {
+    const { inst } = createImageWithNote({ text: '' });
+
+    const exported = inst.getNotes();
+    expect(exported[0].text).toBe('');
+  });
 });
 
 describe('annotateView — positioning', () => {
@@ -373,5 +392,21 @@ describe('auto-scaling — view positioning', () => {
     expect(view.note.top).toBe(50);
     expect(view.note.width).toBe(80);
     expect(view.note.height).toBe(60);
+  });
+
+  test('resetPosition with empty text shows placeholder in tooltip', () => {
+    const inst = createScaledTestImage(400, 300, 200, 150);
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const view = new AnnotateView(inst, note);
+
+    const fakeEditable = {
+      area: document.createElement('div'),
+      note: { ...note },
+    };
+
+    view.resetPosition(fakeEditable, '');
+
+    expect(view.tooltip.textContent).toBe('(no annotation)');
+    expect(view.note.text).toBe('');
   });
 });
