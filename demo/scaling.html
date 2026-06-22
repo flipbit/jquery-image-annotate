@@ -20,6 +20,10 @@
       font-style: italic;
       margin-top: 8px;
     }
+    .img-padded-bordered {
+      padding: 12px;
+      border: 4px solid #666;
+    }
   </style>
 </head>
 <body>
@@ -63,6 +67,12 @@
       </div>
       <p class="resize-hint">Try resizing the browser window.</p>
     </div>
+
+    <div class="demo-section">
+      <h2>Image with Padding &amp; Border</h2>
+      <p>The image has 12px padding and a 4px border. Annotations should be positioned within the image content area, not the padding/border zone.</p>
+      <img id="padded-bordered" class="img-padded-bordered" src="images/starry-night.jpg" alt="Starry Night" width="960" height="760" style="max-width: 100%; height: auto;">
+    </div>
   </div>
 
   <script type="module">
@@ -87,6 +97,11 @@
       });
 
       annotate(document.getElementById('responsive'), {
+        editable: true,
+        notes: JSON.parse(JSON.stringify(notes))
+      });
+
+      annotate(document.getElementById('padded-bordered'), {
         editable: true,
         notes: JSON.parse(JSON.stringify(notes))
       });
