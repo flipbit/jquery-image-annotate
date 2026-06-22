@@ -280,9 +280,7 @@ describe('annotateEdit — save new annotation', () => {
     expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(1);
 
     // Replace notes and reload
-    inst.notes = [
-      { id: 'r1', top: 10, left: 10, width: 50, height: 50, text: 'Reloaded', editable: true },
-    ];
+    inst.notes = [{ id: 'r1', top: 10, left: 10, width: 50, height: 50, text: 'Reloaded', editable: true }];
     inst.load();
 
     // Should have exactly one view — the reloaded note, not the orphaned manual one
