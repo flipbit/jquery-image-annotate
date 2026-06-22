@@ -337,7 +337,9 @@ export class AnnotateImage {
       this.pendingRescale = true;
       return;
     }
-    this.applyRescale(renderedWidth, renderedHeight);
+    const contentWidth = renderedWidth - this.contentInset.left - this.contentInset.right;
+    const contentHeight = renderedHeight - this.contentInset.top - this.contentInset.bottom;
+    this.applyRescale(contentWidth, contentHeight);
   }
 
   /** Apply new scale factors and re-render all views. */
@@ -359,8 +361,10 @@ export class AnnotateImage {
     if (!this.pendingRescale) return;
     this.pendingRescale = false;
     const rect = this.canvas.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      this.applyRescale(rect.width, rect.height);
+    const contentWidth = rect.width - this.contentInset.left - this.contentInset.right;
+    const contentHeight = rect.height - this.contentInset.top - this.contentInset.bottom;
+    if (contentWidth > 0 && contentHeight > 0) {
+      this.applyRescale(contentWidth, contentHeight);
     }
   }
 

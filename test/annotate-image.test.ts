@@ -822,6 +822,45 @@ describe('auto-scaling — ResizeObserver', () => {
     expect(inst.scaleX).toBe(1);
     expect(inst.scaleY).toBe(1);
   });
+
+  test('resize callback subtracts content insets from dimensions', () => {
+    // 400x300 natural, 400x300 content, 10px padding = 420x320 border-box
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0, { notes: [note] });
+    expect(inst.scaleX).toBe(1);
+
+    // ResizeObserver fires with canvas contentRect (= image border-box).
+    // Image shrinks to 200x150 content, so canvas contentRect = 220x170
+    observeCallback!([{ contentRect: { width: 220, height: 170 } }]);
+
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBeCloseTo(0.5, 5);
+  });
+
+  test('deferred rescale subtracts content insets with padding', () => {
+    const note = { id: '1', top: 100, left: 200, width: 80, height: 60, text: 'test', editable: true };
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0, { notes: [note] });
+    expect(inst.scaleX).toBe(1);
+
+    // Enter edit mode
+    inst.add();
+
+    // Simulate resize — deferred
+    observeCallback!([{ contentRect: { width: 220, height: 170 } }]);
+    expect(inst.scaleX).toBe(1);
+
+    // Mock canvas getBoundingClientRect for flush (canvas = image border-box)
+    inst.canvas.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0,
+      right: 220, bottom: 170,
+      width: 220, height: 170,
+      toJSON() { return this; },
+    });
+
+    inst.cancelEdit();
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBeCloseTo(0.5, 5);
+  });
 });
 
 describe('auto-scaling — scale factor computation', () => {
