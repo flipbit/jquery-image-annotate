@@ -23,11 +23,14 @@ npm run build:check
 # Clean dist directory only
 npm run clean
 
-# Run tests
+# Run unit tests (Vitest + jsdom)
 npm test
 
-# Run tests against jQuery 4
+# Run unit tests against jQuery 4
 npm run test:jquery4
+
+# Run e2e tests (Playwright, requires build first)
+npm run test:e2e
 ```
 
 ## Architecture
@@ -61,7 +64,8 @@ demo/
   demo.css                - Shared demo page styles
   fixtures/               - Mock AJAX endpoint files (get.json, save.json, delete.json)
   images/                 - Demo-only images
-test/                     - Vitest test suite
+test/                     - Vitest unit test suite (jsdom)
+e2e/                      - Playwright e2e tests (one spec per demo page)
 dist/                     - Built output (gitignored)
 docs/                     - Migration plans and design documents
 ```
