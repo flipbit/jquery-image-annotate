@@ -122,10 +122,17 @@ export function createPaddedTestImage(
   const borderBoxW = contentW + padding * 2 + border * 2;
   const borderBoxH = contentH + padding * 2 + border * 2;
   img.getBoundingClientRect = () => ({
-    x: 0, y: 0, left: 0, top: 0,
-    right: borderBoxW, bottom: borderBoxH,
-    width: borderBoxW, height: borderBoxH,
-    toJSON() { return this; },
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: borderBoxW,
+    bottom: borderBoxH,
+    width: borderBoxW,
+    height: borderBoxH,
+    toJSON() {
+      return this;
+    },
   });
 
   document.body.appendChild(img);

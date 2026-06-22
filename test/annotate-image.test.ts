@@ -852,10 +852,17 @@ describe('auto-scaling — ResizeObserver', () => {
 
     // Mock canvas getBoundingClientRect for flush (canvas = image border-box)
     inst.canvas.getBoundingClientRect = () => ({
-      x: 0, y: 0, left: 0, top: 0,
-      right: 220, bottom: 170,
-      width: 220, height: 170,
-      toJSON() { return this; },
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 220,
+      bottom: 170,
+      width: 220,
+      height: 170,
+      toJSON() {
+        return this;
+      },
     });
 
     inst.cancelEdit();
@@ -970,9 +977,17 @@ describe('padding/border — scale factor computation', () => {
     img.style.paddingLeft = '15px';
     // content 400x300, border-box = 400+35 x 300+15 = 435x315
     img.getBoundingClientRect = () => ({
-      x: 0, y: 0, left: 0, top: 0, right: 435, bottom: 315,
-      width: 435, height: 315,
-      toJSON() { return this; },
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 435,
+      bottom: 315,
+      width: 435,
+      height: 315,
+      toJSON() {
+        return this;
+      },
     });
     document.body.appendChild(img);
     const inst = new AnnotateImage(img, { editable: true, notes: [] });
@@ -995,9 +1010,17 @@ describe('padding/border — scale factor computation', () => {
     img.style.paddingLeft = '10px';
     // No border set — borderTopWidth etc. will be empty string in jsdom
     img.getBoundingClientRect = () => ({
-      x: 0, y: 0, left: 0, top: 0, right: 420, bottom: 320,
-      width: 420, height: 320,
-      toJSON() { return this; },
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 420,
+      bottom: 320,
+      width: 420,
+      height: 320,
+      toJSON() {
+        return this;
+      },
     });
     document.body.appendChild(img);
     const inst = new AnnotateImage(img, { editable: true, notes: [] });
