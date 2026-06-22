@@ -91,6 +91,8 @@ export class AnnotateImage {
   scaleX: number;
   /** Current vertical scale factor (rendered / natural). */
   scaleY: number;
+  /** Padding+border insets from the image element (px). Zero when the image has no padding/border. */
+  readonly contentInset: { top: number; right: number; bottom: number; left: number };
 
   /** Convert a rect from natural image coordinates to rendered (scaled) coordinates. */
   toRendered(rect: { top: number; left: number; width: number; height: number }) {
@@ -125,12 +127,18 @@ export class AnnotateImage {
     this.handlers = createDefaultHandlers();
     this.img = img;
 
-    // Read natural and rendered dimensions
+    // Read natural and rendered dimensions, subtracting padding/border to get content area
     this.naturalWidth = img.naturalWidth || img.width;
     this.naturalHeight = img.naturalHeight || img.height;
     const rendered = img.getBoundingClientRect();
-    const renderedWidth = rendered.width || img.width;
-    const renderedHeight = rendered.height || img.height;
+    const styles = getComputedStyle(img);
+    const insetTop = parseFloat(styles.paddingTop) + parseFloat(styles.borderTopWidth) || 0;
+    const insetRight = parseFloat(styles.paddingRight) + parseFloat(styles.borderRightWidth) || 0;
+    const insetBottom = parseFloat(styles.paddingBottom) + parseFloat(styles.borderBottomWidth) || 0;
+    const insetLeft = parseFloat(styles.paddingLeft) + parseFloat(styles.borderLeftWidth) || 0;
+    this.contentInset = { top: insetTop, right: insetRight, bottom: insetBottom, left: insetLeft };
+    const renderedWidth = (rendered.width || img.width) - insetLeft - insetRight;
+    const renderedHeight = (rendered.height || img.height) - insetTop - insetBottom;
 
     if (this.naturalWidth === 0 || this.naturalHeight === 0) {
       throw new Error('image-annotate: image must have non-zero dimensions (is the image loaded?)');

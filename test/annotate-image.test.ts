@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
-import { createTestImage, getInstance, createScaledTestImage } from './setup.ts';
+import { createTestImage, getInstance, createScaledTestImage, createPaddedTestImage } from './setup.ts';
 import type { AnnotateView } from '../src/annotate-view';
 
 describe('annotateImage — initialization', () => {
@@ -858,6 +858,38 @@ describe('auto-scaling — scale factor computation', () => {
     const inst = createScaledTestImage(960, 760, 480, 380);
     expect(inst.naturalWidth).toBe(960);
     expect(inst.naturalHeight).toBe(760);
+  });
+});
+
+describe('padding/border — scale factor computation', () => {
+  test('scale factors use content dimensions, not border-box, with padding', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 10, 0);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('scale factors use content dimensions, not border-box, with border', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 0, 5);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+  });
+
+  test('scale factors use content dimensions with both padding and border', () => {
+    const inst = createPaddedTestImage(400, 300, 200, 150, 10, 2);
+    expect(inst.scaleX).toBe(0.5);
+    expect(inst.scaleY).toBe(0.5);
+  });
+
+  test('toRendered uses correct scale with padding present', () => {
+    const inst = createPaddedTestImage(400, 300, 200, 150, 10, 2);
+    const result = inst.toRendered({ top: 100, left: 200, width: 80, height: 60 });
+    expect(result).toEqual({ top: 50, left: 100, width: 40, height: 30 });
+  });
+
+  test('zero padding and border behaves like no padding/border', () => {
+    const inst = createPaddedTestImage(400, 300, 400, 300, 0, 0);
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
   });
 });
 
