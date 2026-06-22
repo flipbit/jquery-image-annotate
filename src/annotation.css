@@ -8,14 +8,14 @@
   background-size: 20px 20px;
   border: var(--image-annotate-add-border);
   border-radius: var(--image-annotate-add-radius);
-  bottom: 8px;
+  bottom: calc(var(--image-annotate-content-bottom, 0px) + 8px);
   color: #fff;
   cursor: pointer;
   height: 32px;
   opacity: 0;
   padding: 0;
   position: absolute;
-  right: 8px;
+  right: calc(var(--image-annotate-content-right, 0px) + 8px);
   transition:
     opacity 0.2s,
     background-color 0.2s;
@@ -80,7 +80,7 @@
 }
 .image-annotate-view {
   display: none;
-  inset: 0;
+  inset: var(--image-annotate-content-top, 0) var(--image-annotate-content-right, 0) var(--image-annotate-content-bottom, 0) var(--image-annotate-content-left, 0);
   position: absolute;
 }
 @media (hover: hover) {
@@ -157,7 +157,7 @@
 }
 .image-annotate-edit {
   display: none;
-  inset: 0;
+  inset: var(--image-annotate-content-top, 0) var(--image-annotate-content-right, 0) var(--image-annotate-content-bottom, 0) var(--image-annotate-content-left, 0);
   position: absolute;
 }
 .image-annotate-edit-form {
