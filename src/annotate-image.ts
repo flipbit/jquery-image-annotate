@@ -159,6 +159,14 @@ export class AnnotateImage {
       this.canvas.dataset.theme = options.theme;
     }
 
+    // Set content inset CSS vars for overlay/button positioning (only when non-zero)
+    if (insetTop || insetRight || insetBottom || insetLeft) {
+      this.canvas.style.setProperty('--image-annotate-content-top', `${insetTop}px`);
+      this.canvas.style.setProperty('--image-annotate-content-right', `${insetRight}px`);
+      this.canvas.style.setProperty('--image-annotate-content-bottom', `${insetBottom}px`);
+      this.canvas.style.setProperty('--image-annotate-content-left', `${insetLeft}px`);
+    }
+
     this.viewOverlay = document.createElement('div');
     this.viewOverlay.className = 'image-annotate-view';
 
