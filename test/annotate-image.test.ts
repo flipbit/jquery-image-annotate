@@ -1,6 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import '../src/jquery.annotate.ts';
 import { createTestImage, getInstance, createScaledTestImage, createPaddedTestImage } from './setup.ts';
+import { AnnotateImage } from '../src/annotate-image';
 import type { AnnotateView } from '../src/annotate-view';
 
 describe('annotateImage — initialization', () => {
@@ -953,6 +954,56 @@ describe('padding/border — scale factor computation', () => {
     expect(inst.canvas.style.getPropertyValue('--image-annotate-content-right')).toBe('');
     expect(inst.canvas.style.getPropertyValue('--image-annotate-content-bottom')).toBe('');
     expect(inst.canvas.style.getPropertyValue('--image-annotate-content-left')).toBe('');
+  });
+
+  test('handles asymmetric padding correctly', () => {
+    document.body.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = 'test.jpg';
+    img.width = 400;
+    img.height = 300;
+    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
+    img.style.paddingTop = '10px';
+    img.style.paddingRight = '20px';
+    img.style.paddingBottom = '5px';
+    img.style.paddingLeft = '15px';
+    // content 400x300, border-box = 400+35 x 300+15 = 435x315
+    img.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0, right: 435, bottom: 315,
+      width: 435, height: 315,
+      toJSON() { return this; },
+    });
+    document.body.appendChild(img);
+    const inst = new AnnotateImage(img, { editable: true, notes: [] });
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+    expect(inst.contentInset).toEqual({ top: 10, right: 20, bottom: 5, left: 15 });
+  });
+
+  test('handles padding with no border (border style unset)', () => {
+    document.body.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = 'test.jpg';
+    img.width = 400;
+    img.height = 300;
+    Object.defineProperty(img, 'naturalWidth', { value: 400, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 300, configurable: true });
+    img.style.paddingTop = '10px';
+    img.style.paddingRight = '10px';
+    img.style.paddingBottom = '10px';
+    img.style.paddingLeft = '10px';
+    // No border set — borderTopWidth etc. will be empty string in jsdom
+    img.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0, right: 420, bottom: 320,
+      width: 420, height: 320,
+      toJSON() { return this; },
+    });
+    document.body.appendChild(img);
+    const inst = new AnnotateImage(img, { editable: true, notes: [] });
+    expect(inst.scaleX).toBe(1);
+    expect(inst.scaleY).toBe(1);
+    expect(inst.contentInset).toEqual({ top: 10, right: 10, bottom: 10, left: 10 });
   });
 });
 

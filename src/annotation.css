@@ -80,7 +80,7 @@
 }
 .image-annotate-view {
   display: none;
-  inset: var(--image-annotate-content-top, 0) var(--image-annotate-content-right, 0) var(--image-annotate-content-bottom, 0) var(--image-annotate-content-left, 0);
+  inset: var(--image-annotate-content-top, 0px) var(--image-annotate-content-right, 0px) var(--image-annotate-content-bottom, 0px) var(--image-annotate-content-left, 0px);
   position: absolute;
 }
 @media (hover: hover) {
@@ -157,7 +157,7 @@
 }
 .image-annotate-edit {
   display: none;
-  inset: var(--image-annotate-content-top, 0) var(--image-annotate-content-right, 0) var(--image-annotate-content-bottom, 0) var(--image-annotate-content-left, 0);
+  inset: var(--image-annotate-content-top, 0px) var(--image-annotate-content-right, 0px) var(--image-annotate-content-bottom, 0px) var(--image-annotate-content-left, 0px);
   position: absolute;
 }
 .image-annotate-edit-form {
