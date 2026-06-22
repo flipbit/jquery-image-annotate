@@ -168,6 +168,7 @@ export class AnnotateEdit {
         } else {
           this.note.editable = true;
           const view = new AnnotateView(this.image, this.note);
+          this.note.view = view;
           view.resetPosition(this, text);
           this.image.notes.push(this.note);
         }

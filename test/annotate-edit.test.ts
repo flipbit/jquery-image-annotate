@@ -239,6 +239,57 @@ describe('annotateEdit — save new annotation', () => {
     expect(inst.viewOverlay.querySelector('.image-annotate-note').textContent).toBe('Saved note');
   });
 
+  test('save assigns view to the note so destroyViews can clean it up', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    inst.add();
+    inst.canvas.querySelector('.image-annotate-edit-form textarea').value = 'Test';
+    inst.canvas.querySelector('.image-annotate-edit-ok').click();
+
+    expect(inst.notes[0].view).toBeDefined();
+  });
+
+  test('clear() removes DOM of manually added note', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    // Add a note via the UI flow (add + save)
+    inst.add();
+    inst.canvas.querySelector('.image-annotate-edit-form textarea').value = 'Manual note';
+    inst.canvas.querySelector('.image-annotate-edit-ok').click();
+
+    expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(1);
+
+    // Clear all notes
+    inst.clear();
+
+    expect(inst.notes.length).toBe(0);
+    expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(0);
+  });
+
+  test('load() after manual add replaces all views without orphans', () => {
+    const image = createTestImage();
+    const inst = getInstance(image);
+
+    // Add a note via the UI flow (add + save)
+    inst.add();
+    inst.canvas.querySelector('.image-annotate-edit-form textarea').value = 'Manual note';
+    inst.canvas.querySelector('.image-annotate-edit-ok').click();
+
+    expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(1);
+
+    // Replace notes and reload
+    inst.notes = [
+      { id: 'r1', top: 10, left: 10, width: 50, height: 50, text: 'Reloaded', editable: true },
+    ];
+    inst.load();
+
+    // Should have exactly one view — the reloaded note, not the orphaned manual one
+    expect(inst.viewOverlay.querySelectorAll('.image-annotate-area').length).toBe(1);
+    expect(inst.viewOverlay.querySelector('.image-annotate-note').textContent).toBe('Reloaded');
+  });
+
   test('save with api.save sends JSON to callback', async () => {
     const saveFn = vi.fn(() => Promise.resolve({ annotation_id: 'new-42' }));
 

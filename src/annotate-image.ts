@@ -246,6 +246,8 @@ export class AnnotateImage {
     for (const note of this.notes) {
       note.view?.destroy();
     }
+    // Remove any orphaned view elements (e.g. if notes array was replaced externally)
+    this.viewOverlay.replaceChildren();
   }
 
   private createViews(): void {
