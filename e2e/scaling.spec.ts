@@ -66,4 +66,61 @@ test.describe('Scaling', () => {
       expect(newBox.width).toBeLessThan(initialBox.width);
     }
   });
+
+  test('padded/bordered image: renders 4 annotations', async ({ page }) => {
+    const canvas = page.locator('.image-annotate-canvas').nth(3);
+    const areas = canvas.locator('.image-annotate-area');
+    await expect(areas).toHaveCount(4);
+  });
+
+  test('padded/bordered image: annotations are within image content area', async ({ page }) => {
+    const canvas = page.locator('.image-annotate-canvas').nth(3);
+    const img = canvas.locator('img');
+    const imgBox = await img.boundingBox();
+    const areas = canvas.locator('.image-annotate-area');
+    const count = await areas.count();
+
+    // The image has 12px padding + 4px border = 16px inset on each side.
+    // Annotations should be within the content area (inset from border-box by 16px).
+    const inset = 12 + 4; // padding + border
+    for (let i = 0; i < count; i++) {
+      const areaBox = await areas.nth(i).boundingBox();
+      if (areaBox && imgBox) {
+        expect(areaBox.x).toBeGreaterThanOrEqual(imgBox.x + inset - 2);
+        expect(areaBox.y).toBeGreaterThanOrEqual(imgBox.y + inset - 2);
+        expect(areaBox.x + areaBox.width).toBeLessThanOrEqual(imgBox.x + imgBox.width - inset + 2);
+        expect(areaBox.y + areaBox.height).toBeLessThanOrEqual(imgBox.y + imgBox.height - inset + 2);
+      }
+    }
+  });
+
+  test('padded/bordered image: Add Note button is within image content area', async ({ page }) => {
+    const canvas = page.locator('.image-annotate-canvas').nth(3);
+    const img = canvas.locator('img');
+    const imgBox = await img.boundingBox();
+    const button = canvas.locator('.image-annotate-add');
+
+    // Hover to make button visible
+    await canvas.hover();
+    const btnBox = await button.boundingBox();
+
+    const inset = 12 + 4; // padding + border
+    if (btnBox && imgBox) {
+      // Button's right edge should be within the content area (with 8px margin from CSS)
+      expect(btnBox.x + btnBox.width).toBeLessThanOrEqual(imgBox.x + imgBox.width - inset + 1);
+      // Button's bottom edge should be within the content area
+      expect(btnBox.y + btnBox.height).toBeLessThanOrEqual(imgBox.y + imgBox.height - inset + 1);
+    }
+  });
+
+  test('padded/bordered image: hover shows tooltip', async ({ page }) => {
+    const canvas = page.locator('.image-annotate-canvas').nth(3);
+    const area = canvas.locator('.image-annotate-area').last();
+    const tooltip = area.locator('.image-annotate-note');
+
+    await expect(tooltip).toBeHidden();
+    await canvas.hover();
+    await area.hover();
+    await expect(tooltip).toBeVisible();
+  });
 });
