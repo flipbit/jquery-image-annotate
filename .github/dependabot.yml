@@ -20,10 +20,6 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "react-dom"
       update-types: ["version-update:semver-major"]
-    - dependency-name: "eslint"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "@eslint/js"
-      update-types: ["version-update:semver-major"]
     - dependency-name: "jsdom"
       update-types: ["version-update:semver-major"]
   groups:
