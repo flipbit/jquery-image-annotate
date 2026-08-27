@@ -1,0 +1,3 @@
+paths-ignore:
+  - dist
+  - demo/images
