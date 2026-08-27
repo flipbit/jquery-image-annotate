@@ -657,8 +657,7 @@ describe('auto-scaling — ResizeObserver', () => {
     observeCallback = null;
     disconnected = false;
     originalResizeObserver = (globalThis as Record<string, unknown>).ResizeObserver as
-      | typeof ResizeObserver
-      | undefined;
+      typeof ResizeObserver | undefined;
     vi.stubGlobal(
       'ResizeObserver',
       class {
