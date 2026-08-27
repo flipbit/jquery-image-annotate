@@ -7,6 +7,13 @@ updates:
     day: monday
     time: "04:00"
   open-pull-requests-limit: 10
+  ignore:
+    - dependency-name: "@types/jquery"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/react"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "@types/react-dom"
+      update-types: ["version-update:semver-major"]
   groups:
     all-npm-updates:
       patterns:
