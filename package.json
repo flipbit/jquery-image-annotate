@@ -54,8 +54,8 @@
     "test:e2e": "npx playwright test --config e2e/playwright.config.ts",
     "lint": "eslint src/ test/",
     "lint:fix": "eslint --fix src/ test/",
-    "format": "prettier --write 'src/**/*.{ts,css}' 'test/**/*.ts' '*.{js,ts,json}'",
-    "format:check": "prettier --check 'src/**/*.{ts,css}' 'test/**/*.ts' '*.{js,ts,json}'",
+    "format": "prettier --write 'src/**/*.{ts,css}' 'test/**/*.ts' '*.{js,ts,mts,json}'",
+    "format:check": "prettier --check 'src/**/*.{ts,css}' 'test/**/*.ts' '*.{js,ts,mts,json}'",
     "demo": "npm run build && concurrently -k \"npm:demo:watch:*\" \"npm:demo:serve\"",
     "demo:watch:core": "esbuild src/index.ts --bundle --format=esm --outfile=dist/core.js --watch",
     "demo:watch:core-min": "esbuild src/index.ts --bundle --minify --format=iife --global-name=AnnotateImage --outfile=dist/core.min.js --watch",
@@ -91,7 +91,7 @@
     "react-dom": "^18.3.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
-    "vitest": "^4.1.0",
+    "vitest": "^5.0.5",
     "vue": "^3.5.30"
   },
   "peerDependencies": {
