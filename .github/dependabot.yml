@@ -26,3 +26,6 @@ updates:
     all-npm-updates:
       patterns:
         - "*"
+      update-types:
+        - "minor"
+        - "patch"
